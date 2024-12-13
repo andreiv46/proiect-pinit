@@ -3,10 +3,11 @@
 </script>
 
 <template>
-  <main>
-    <RouterView />
-  </main>
+  <div>
+    Not found!
+  </div>
 </template>
 
 <style scoped>
+
 </style>

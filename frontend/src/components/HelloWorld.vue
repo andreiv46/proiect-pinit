@@ -1,7 +1,23 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import {authService} from "../firebase/firebase.auth.ts";
+import Login from "./Login.vue";
 
 defineProps<{ msg: string }>()
+
+const emailInput = ref<string>("")
+const passwordInput = ref<string>("")
+
+function register(e: Event){
+  e.preventDefault()
+  console.log(emailInput.value, passwordInput.value)
+  authService.register({email: emailInput.value, password: passwordInput.value, name: "Ion"})
+}
+
+function showCurrentUser(){
+  console.log(authService.getCurrentUser())
+  console.log(authService.getCurrentUser()?.emailVerified)
+}
 
 const count = ref(0)
 </script>
@@ -15,6 +31,14 @@ const count = ref(0)
       Edit
       <code>components/HelloWorld.vue</code> to test HMR
     </p>
+
+    <input type="text" placeholder="Introdu emailul" v-model="emailInput" >
+    <br>
+    <input type="password" placeholder="Introdu parola" v-model="passwordInput">
+    <br>
+    <button @click="register">Register</button>
+    <br>
+    <button @click="showCurrentUser">Current user</button>
   </div>
 
   <p>
@@ -32,6 +56,7 @@ const count = ref(0)
     >.
   </p>
   <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>
+  <Login />
 </template>
 
 <style scoped>

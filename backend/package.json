@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node-dev src/index.ts"
+    "dev": "ts-node-dev src/index.ts | pino-pretty"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -17,8 +17,12 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/firebase": "^3.2.3",
+    "firebase-admin": "^13.0.1",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "pino": "^9.5.0",
+    "pino-pretty": "^13.0.0",
+    "dayjs": "^1.11.13"
   },
   "private": true
 }

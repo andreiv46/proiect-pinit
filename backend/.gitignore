@@ -8,5 +8,7 @@ yarn-error.log*
 /.pnp
 .pnp.js
 .env
+firebase-config.json
+proiect-tic-credentials.json
 
 .vscode/*
