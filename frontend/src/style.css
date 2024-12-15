@@ -1,3 +1,10 @@
+@import "primeicons/primeicons.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*body {*/
+/*    background-size: cover;*/
+/*    background: linear-gradient(-225deg, #4FD1C5, #38B2AC) center;*/
+/*    min-height: 100vh;*/
+/*}*/

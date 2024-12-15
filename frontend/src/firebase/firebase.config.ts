@@ -1,8 +1,10 @@
 import {initializeApp} from "firebase/app"
 import { getAnalytics } from "firebase/analytics"
 import firebaseConfig from "../../firebase-config.json"
+import {getAuth} from "firebase/auth/cordova";
 
-const app = initializeApp(firebaseConfig)
-const analytics = getAnalytics(app)
+const firebaseApp = initializeApp(firebaseConfig)
+const analytics = getAnalytics(firebaseApp)
+const auth = getAuth(firebaseApp)
 
-export {app, analytics}
+export {auth, analytics}
