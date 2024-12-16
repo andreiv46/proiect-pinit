@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import {ref} from "vue";
-import {Avatar, Image, InputGroup, InputGroupAddon, InputText, Menubar} from "primevue";
+import {Avatar, InputGroup, InputGroupAddon, InputText, Menubar} from "primevue";
 import {authService} from "../firebase/firebase.auth.ts";
+import router from "../router/router.ts";
 
 const items = ref([
   {
@@ -34,28 +35,31 @@ const items = ref([
     ]
   }
 ])
-const isAuthenticated = ref<boolean>(authService.isAuthenticated())
+
+async function toHome() {
+  await router.push("/")
+}
 </script>
 
 <template>
-  <div class="card sticky top-0">
+  <div class="card sticky top-0 z-50 mb-4">
     <Menubar :model="items">
       <template #start>
-        <img src="/ecopin.svg" class="mx-auto fill-teal-600 dark:fill-teal-400 h-12" alt=""/>
-        <Image src="/ecopin.svg" class="mx-auto fill-teal-600 dark:fill-teal-400 h-12" alt="Image"/>
+        <img @click="toHome" src="/ecopin.svg"
+             class="mx-auto fill-teal-600 dark:fill-teal-400 h-12 hover:cursor-pointer" alt="Logo"/>
       </template>
       <template #item="{ item, props, hasSubmenu, root }">
         <a v-ripple class="flex items-center" v-bind="props.action">
           <i :class="item.icon"/>
-          <i v-if="isAuthenticated" class="pi pi-apple"/>
+          <i v-if="authService.isAuthenticated.value" class="pi pi-apple"/>
           <span>{{ item.label }}</span>
           <Badge v-if="item.badge" :class="{ 'ml-auto': !root, 'ml-2': root }" :value="item.badge"/>
           <span v-if="item.shortcut"
-                class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">{{
-              item.shortcut
-            }}</span>
+                class="ml-auto border border-surface rounded bg-emphasis text-muted-color text-xs p-1">
+            {{ item.shortcut }}
+          </span>
           <i v-if="hasSubmenu"
-             :class="['pi pi-angle-down ml-auto', { 'pi-angle-down': root, 'pi-angle-right': !root }]"></i>
+             :class="['pi pi-angle-down ml-auto', { 'pi-angle-down': root, 'pi-angle-right': !root }]"/>
         </a>
       </template>
       <template #end>

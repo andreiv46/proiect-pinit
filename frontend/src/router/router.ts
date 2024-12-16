@@ -35,13 +35,14 @@ const router = createRouter({
 
 function verifyAccess(to: RouteLocationNormalizedGeneric, next: NavigationGuardNext) {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-        if (!authService.isAuthenticated()) {
+        if (!authService.isAuthenticated.value) {
             return next({path: "/login"})
         }
     }
-    if (to.path === "/login" && authService.isAuthenticated()) {
+    if (to.path === "/login" && authService.isAuthenticated.value) {
         return next({path: "/"})
     }
+    next()
 }
 
 router.beforeEach(
@@ -51,7 +52,6 @@ router.beforeEach(
         next: NavigationGuardNext): Promise<void> => {
         await waitForAuthInitialization()
         verifyAccess(to, next)
-        next()
     })
 
 export default router
