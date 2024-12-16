@@ -7,7 +7,7 @@ import {authService} from "../firebase/firebase.auth.ts";
 
 async function logout() {
   await signOut(auth)
-      .then(() => {console.log("signed out!")}, (err) => {
+      .then(() => {console.log("signed out")}, (err) => {
         console.error("sign out failed", err)
       })
   await router.push("/login")
@@ -23,7 +23,3 @@ async function displayCurrentUser(){
   <Button label="Log out" icon="pi pi-user" @click="logout"/>
   <Button label="Current user" icon="pi pi-user" @click="displayCurrentUser"/>
 </template>
-
-<style scoped>
-
-</style>

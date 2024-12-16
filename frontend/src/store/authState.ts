@@ -1,35 +1,65 @@
-import {Module} from "vuex";
-
-interface User {
-    id: string,
-    name: string,
-    email: string
-}
+import {Module} from "vuex"
+import {User} from "firebase/auth"
+import {authService, RegisterInput} from "../firebase/firebase.auth.ts"
 
 interface AuthState {
     user: User | null,
-    isLoading: boolean
+    isAuthenticated: boolean
 }
 
 export const authModule: Module<AuthState, any> = {
     namespaced: true,
-    state: (): AuthState => ({user: null, isLoading: false}),
+    state: {
+        user: null,
+        isAuthenticated: false,
+    },
     mutations: {
-        setUser(state: AuthState, user: User): void {
+        setUser(state, user: User | null) {
             state.user = user
+            state.isAuthenticated = user !== null
         },
-        setLoading(state: AuthState, isLoading: boolean): void {
-            state.isLoading = isLoading
-        }
+        clearUser(state) {
+            state.user = null
+            state.isAuthenticated = false;
+        },
     },
     actions: {
+        async register({ commit }, input: RegisterInput) {
+            const result = await authService.register(input)
+            if (result.success) {
+                commit('setUser', authService.getCurrentUser());
+            }
+            return result;
+        },
+        async signInWithEmailLink({ commit }, email: string) {
+            const result = await authService.signInWithEmailLink(email)
+            if (result.success) {
+                commit('setUser', authService.getCurrentUser())
+            }
+            return result;
+        },
+        async onSignInWithEmailLinkRedirect({ commit }) {
+            const result = await authService.onSignInWithEmailLinkRedirect()
+            if (result.success) {
+                commit('setUser', authService.getCurrentUser())
+            }
+            return result;
+        },
+        async logout({ commit }) {
+            await authService.logout()
+            commit('clearUser')
+        },
+        async initializeAuthState({ commit }) {
+            await authService.waitForAuthInitialization()
+            commit('setUser', authService.getCurrentUser())
+        },
     },
     getters: {
-        user(state: AuthState): User | null {
+        isAuthenticated(state) {
+            return state.isAuthenticated
+        },
+        currentUser(state) {
             return state.user
         },
-        isLoading(state: AuthState): boolean {
-            return state.isLoading
-        }
-    }
+    },
 }

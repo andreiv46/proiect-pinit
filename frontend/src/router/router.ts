@@ -3,7 +3,7 @@ import NotFound from "../components/NotFound.vue";
 import Home from "../components/Home.vue";
 import Login from "../components/Login.vue";
 import Register from "../components/Register.vue";
-import {authService} from "../firebase/firebase.auth.ts";
+import {authService, waitForAuthInitialization} from "../firebase/firebase.auth.ts";
 import Test from "../components/Test.vue";
 import SignInResult from "../components/SignInResult.vue";
 
@@ -39,6 +39,9 @@ function verifyAccess(to: RouteLocationNormalizedGeneric, next: NavigationGuardN
             return next({path: "/login"})
         }
     }
+    if (to.path === "/login" && authService.isAuthenticated()) {
+        return next({path: "/"})
+    }
 }
 
 router.beforeEach(
@@ -46,6 +49,7 @@ router.beforeEach(
         to: RouteLocationNormalizedGeneric,
         _from: RouteLocationNormalizedGeneric,
         next: NavigationGuardNext): Promise<void> => {
+        await waitForAuthInitialization()
         verifyAccess(to, next)
         next()
     })
