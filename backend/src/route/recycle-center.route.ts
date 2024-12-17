@@ -1,9 +1,9 @@
-import { Router } from "express";
-import { getRecycleCenters } from "../controller/recycle-center.controller";
+import { Router } from 'express'
+import { getRecycleCenters } from '../controller/recycle-center.controller'
 
 const router = Router()
 
 router
-    .get("/", getRecycleCenters);
+    .get('/', getRecycleCenters)
 
 export default router

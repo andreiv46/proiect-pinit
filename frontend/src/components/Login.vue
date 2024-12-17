@@ -1,48 +1,72 @@
-<script setup lang="ts">
-import Button from 'primevue/button';
-import Checkbox from 'primevue/checkbox';
-import InputText from 'primevue/inputtext';
-import Toast from "primevue/toast";
+<script setup lang='ts'>
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import InputText from 'primevue/inputtext'
+import Toast from 'primevue/toast'
 
-import {onMounted, ref} from 'vue';
-import router from "../router/router.ts";
-import {authService} from "../firebase/firebase.auth.ts";
-import {useToast} from "primevue/usetoast";
+import {onMounted, ref} from 'vue'
+import router from '../router/router.ts'
+import {useAuthStore} from '../store/auth.store.ts'
+import {useToast} from 'primevue/usetoast'
 
-const emailOnlyChecked = ref<boolean>(false);
-const emailInput = ref<string>("")
-const passwordInput = ref<string>("")
+const emailOnlyChecked = ref<boolean>(false)
+const emailInput = ref<string>('')
+const passwordInput = ref<string>('')
 
 const toast = useToast()
+const authStore = useAuthStore()
 
 async function toRegister() {
-  await router.push("/register")
+  await router.push('/register')
 }
 
 onMounted(async () => {
-  const signInChannel = new BroadcastChannel("sigin_channel")
+  const signInChannel = new BroadcastChannel('sigin_channel')
   signInChannel.onmessage = async (message) => {
-    if (message.data.type === "SIGNIN_SUCCESSFUL") {
-      await router.push("/")
+    if (message.data.type === 'SIGNIN_SUCCESSFUL') {
+      await router.push('/')
     }
   }
 })
 
 async function handleLogin() {
-  if (emailOnlyChecked) {
-    window.localStorage.setItem('emailForSignIn', emailInput.value);
-    const result = await authService.signInWithEmailLink(emailInput.value)
+  if (emailOnlyChecked.value) {
+    window.localStorage.setItem('emailForSignIn', emailInput.value)
+    const result = await authStore.logInWithEmailLink(emailInput.value)
     if (result.success) {
       toast.add({
-        severity: "success",
-        summary: "The sign in link has been sent to your email account!",
+        severity: 'success',
+        summary: 'The sign in link has been sent to your email account!',
         life: 3000,
         closable: true
       })
+      await router.push('/')
     } else {
       toast.add({
-        severity: "error",
-        summary: "Couldn't sign in",
+        severity: 'error',
+        summary: 'Couldn\'t sign in',
+        detail: result.errorMessage,
+        life: 3000,
+        closable: true
+      })
+    }
+  } else {
+    const result = await authStore.logInWithEmailAndPassword({
+      email: emailInput.value,
+      password: passwordInput.value
+    })
+    if (result.success) {
+      toast.add({
+        severity: 'success',
+        summary: 'You have successfully signed in!',
+        life: 3000,
+        closable: true
+      })
+      await router.push('/')
+    } else {
+      toast.add({
+        severity: 'error',
+        summary: 'Couldn\'t sign in',
         detail: result.errorMessage,
         life: 3000,
         closable: true
@@ -56,36 +80,36 @@ async function handleLogin() {
 <template>
   <!--  bg-gradient-to-r from-teal-500 to-cyan-400-->
   <Toast/>
-  <div class="px-6 py-20 md:px-12 lg:px-20">
-    <div class="bg-white dark:bg-slate-800 p-6 shadow-lg rounded-lg w-full lg:w-6/12 mx-auto">
-      <div class="text-center mb-4">
-        <img src="/ecopin.svg" class="mx-auto fill-teal-600 dark:fill-teal-400 h-40" alt=""/>
-        <div class="text-teal-700 dark:text-teal-100 text-3xl font-medium mb-4">Welcome Back</div>
-        <span class="text-slate-500 dark:text-slate-400 font-medium leading-normal">Don't have an account?</span>
-        <span @click="toRegister"
-              class="font-medium no-underline ml-2 text-teal-600 cursor-pointer hover:text-teal-500">Sign up!</span>
+  <div class='px-6 py-20 md:px-12 lg:px-20'>
+    <div class='bg-white dark:bg-slate-800 p-6 shadow-lg rounded-lg w-full lg:w-6/12 mx-auto'>
+      <div class='text-center mb-4'>
+        <img src='/ecopin.svg' class='mx-auto fill-teal-600 dark:fill-teal-400 h-40' alt=''/>
+        <div class='text-teal-700 dark:text-teal-100 text-3xl font-medium mb-4'>Welcome Back</div>
+        <span class='text-slate-500 dark:text-slate-400 font-medium leading-normal'>Don't have an account?</span>
+        <span @click='toRegister'
+              class='font-medium no-underline ml-2 text-teal-600 cursor-pointer hover:text-teal-500'>Sign up!</span>
       </div>
 
       <div>
-        <label for="email" class="text-slate-800 dark:text-slate-200 font-medium mb-2 block">Email</label>
-        <InputText v-model="emailInput" id="email" type="text" placeholder="Email address"
-                   class="w-full mb-4 border-teal-400"/>
+        <label for='email' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Email</label>
+        <InputText v-model='emailInput' id='email' type='text' placeholder='Email address'
+                   class='w-full mb-4 border-teal-400'/>
 
-        <label v-if="!emailOnlyChecked" for="password"
-               class="text-slate-800 dark:text-slate-200 font-medium mb-2 block">Password</label>
-        <InputText v-if="!emailOnlyChecked" v-model="passwordInput" id="password" type="password" placeholder="Password"
-                   class="w-full mb-4 border-teal-400"/>
+        <label v-if='!emailOnlyChecked' for='password'
+               class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Password</label>
+        <InputText v-if='!emailOnlyChecked' v-model='passwordInput' id='password' type='password' placeholder='Password'
+                   class='w-full mb-4 border-teal-400'/>
 
-        <div class="flex items-center justify-between mb-12">
-          <div class="flex items-center">
-            <Checkbox id="emailOnlyChecked" v-model="emailOnlyChecked" :binary="true" class="mr-2 text-teal-600"/>
-            <label for="emailOnlyChecked" class="text-slate-800 dark:text-slate-200">Sign in without password</label>
+        <div class='flex items-center justify-between mb-12'>
+          <div class='flex items-center'>
+            <Checkbox id='emailOnlyChecked' v-model='emailOnlyChecked' :binary='true' class='mr-2 text-teal-600'/>
+            <label for='emailOnlyChecked' class='text-slate-800 dark:text-slate-200'>Sign in without password</label>
           </div>
-          <a class="font-medium no-underline ml-2 text-teal-600 text-right cursor-pointer hover:text-teal-500">Forgot
+          <a class='font-medium no-underline ml-2 text-teal-600 text-right cursor-pointer hover:text-teal-500'>Forgot
             password?</a>
         </div>
-        <Button @click="handleLogin" label="Sign In" icon="pi pi-user"
-                class="w-full bg-teal-600 hover:bg-teal-500 text-white"/>
+        <Button @click='handleLogin' label='Sign In' icon='pi pi-user'
+                class='w-full bg-teal-600 hover:bg-teal-500 text-white'/>
       </div>
     </div>
   </div>

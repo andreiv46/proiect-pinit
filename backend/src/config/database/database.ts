@@ -1,5 +1,5 @@
-import admin, {ServiceAccount} from "firebase-admin";
-import serviceAccount from "../../../proiect-tic-credentials.json"
+import admin, {ServiceAccount} from 'firebase-admin'
+import serviceAccount from '../../../proiect-tic-credentials.json'
 
 // @ts-ignore
 admin.initializeApp({

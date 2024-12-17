@@ -3,4 +3,4 @@ export interface BroadcastMessage {
     payload?: any
 }
 
-export const signInChannel = new BroadcastChannel("sigin_channel")
+export const signInChannel = new BroadcastChannel('sigin_channel')

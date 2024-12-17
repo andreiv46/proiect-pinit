@@ -1,46 +1,46 @@
-import {createRouter, createWebHistory, NavigationGuardNext, RouteLocationNormalizedGeneric} from "vue-router";
-import NotFound from "../components/NotFound.vue";
-import Home from "../components/Home.vue";
-import Login from "../components/Login.vue";
-import Register from "../components/Register.vue";
-import {authService, waitForAuthInitialization} from "../firebase/firebase.auth.ts";
-import Test from "../components/Test.vue";
-import SignInResult from "../components/SignInResult.vue";
+import {createRouter, createWebHistory, NavigationGuardNext, RouteLocationNormalizedGeneric} from 'vue-router'
+import NotFound from '../components/NotFound.vue'
+import Home from '../components/Home.vue'
+import Login from '../components/Login.vue'
+import Register from '../components/Register.vue'
+import {useAuthStore} from '../store/auth.store.ts'
+import Test from '../components/Test.vue'
+import SignInResult from '../components/SignInResult.vue'
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: "/", component: Home
+            path: '/', component: Home
         },
         {
-            path: "/login", component: Login
+            path: '/login', component: Login
         },
         {
-            path: "/register", component: Register
+            path: '/register', component: Register
         },
         {
-            path: "/test", component: Test, meta: {
+            path: '/test', component: Test, meta: {
                 requiresAuth: true
             }
         },
         {
-            path: "/signInResult", component: SignInResult
+            path: '/signInResult', component: SignInResult
         },
         {
-            path: "/:pathMatch(.*)*", component: NotFound
+            path: '/:pathMatch(.*)*', component: NotFound
         }
     ],
 })
 
-function verifyAccess(to: RouteLocationNormalizedGeneric, next: NavigationGuardNext) {
+function verifyAccess(to: RouteLocationNormalizedGeneric, next: NavigationGuardNext, isAuthenticated: boolean) {
     if (to.matched.some((record) => record.meta.requiresAuth)) {
-        if (!authService.isAuthenticated.value) {
-            return next({path: "/login"})
+        if (!isAuthenticated) {
+            return next({path: '/login'})
         }
     }
-    if (to.path === "/login" && authService.isAuthenticated.value) {
-        return next({path: "/"})
+    if (to.path === '/login' && isAuthenticated) {
+        return next({path: '/'})
     }
     next()
 }
@@ -50,8 +50,11 @@ router.beforeEach(
         to: RouteLocationNormalizedGeneric,
         _from: RouteLocationNormalizedGeneric,
         next: NavigationGuardNext): Promise<void> => {
-        await waitForAuthInitialization()
-        verifyAccess(to, next)
+        const authStore = useAuthStore()
+        if (!authStore.getIsAuthInitialized) {
+            await authStore.waitForAuthInitialization()
+        }
+        verifyAccess(to, next, authStore.getIsAuthenticated)
     })
 
 export default router

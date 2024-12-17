@@ -1,6 +1,6 @@
-<script setup lang="ts">
-import {Toast} from "primevue";
-import NavBar from "./components/NavBar.vue";
+<script setup lang='ts'>
+import {Toast} from 'primevue'
+import NavBar from './components/NavBar.vue'
 </script>
 
 <template>
@@ -8,5 +8,5 @@ import NavBar from "./components/NavBar.vue";
   <main>
     <RouterView/>
   </main>
-  <Toast position="top-left" group="tl" />
+  <Toast position='top-left' group='tl' />
 </template>
