@@ -5,6 +5,7 @@ import {
     sendSignInLinkToEmail,
     signInWithEmailAndPassword,
     signInWithEmailLink,
+    updateProfile,
     User
 } from 'firebase/auth/cordova'
 import {auth} from '../config/firebase.config.ts'
@@ -55,6 +56,9 @@ export const useAuthStore = defineStore('auth', () => {
     async function register(input: RegisterInput): Promise<Result> {
         try {
             const credentials = await createUserWithEmailAndPassword(auth, input.email, input.password)
+            await updateProfile(auth.currentUser!, {
+                displayName: input.name
+            })
             console.log(credentials.user)
             currentUser.value = credentials.user
             return {success: true}

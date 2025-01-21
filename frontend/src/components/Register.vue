@@ -52,7 +52,7 @@ async function register() {
         <span @click='toLogin' class='font-medium no-underline ml-2 text-teal-600 cursor-pointer hover:text-teal-500'>Sign in!</span>
       </div>
       <div>
-        <label for='name' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Name</label>
+        <label for='name' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Username</label>
         <InputText v-model='nameInput' id='name' type='text' placeholder='Name' class='w-full mb-4 border-teal-400'/>
 
         <label for='email' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Email</label>

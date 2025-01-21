@@ -6,6 +6,7 @@ import Register from '../components/Register.vue'
 import {useAuthStore} from '../store/auth.store.ts'
 import Test from '../components/Test.vue'
 import SignInResult from '../components/SignInResult.vue'
+import Map from "../components/map/Map.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -18,6 +19,9 @@ const router = createRouter({
         },
         {
             path: '/register', component: Register
+        },
+        {
+            path: '/map', component: Map
         },
         {
             path: '/test', component: Test, meta: {

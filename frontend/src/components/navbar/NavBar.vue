@@ -1,8 +1,10 @@
 <script setup lang='ts'>
 import {ref} from 'vue'
-import {Avatar, InputGroup, InputGroupAddon, InputText, Menubar} from 'primevue'
-import {useAuthStore} from '../store/auth.store.ts'
-import router from '../router/router.ts'
+import {InputGroup, InputGroupAddon, InputText, Menubar} from 'primevue'
+import {useAuthStore} from '../../store/auth.store.ts'
+import router from '../../router/router.ts'
+import NavBarProfile from "./NavBarProfile.vue";
+import Button from "primevue/button";
 
 const items = ref([
   {
@@ -40,6 +42,11 @@ const authStore = useAuthStore()
 async function toHome() {
   await router.push('/')
 }
+
+async function goToSignIn(){
+  await router.push('/login')
+}
+
 </script>
 
 <template>
@@ -52,7 +59,6 @@ async function toHome() {
       <template #item='{ item, props, hasSubmenu, root }'>
         <a v-ripple class='flex items-center' v-bind='props.action'>
           <i :class='item.icon'/>
-          <i v-if='authStore.getIsAuthenticated' class='pi pi-apple'/>
           <span>{{ item.label }}</span>
           <Badge v-if='item.badge' :class="{ 'ml-auto': !root, 'ml-2': root }" :value='item.badge'/>
           <span v-if='item.shortcut'
@@ -71,7 +77,8 @@ async function toHome() {
             </InputGroupAddon>
             <InputText id="search" placeholder='Search' type='text' class='w-32 sm:w-auto'/>
           </InputGroup>
-          <Avatar image='https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png' shape='circle'/>
+          <NavBarProfile v-if="authStore.getIsAuthenticated"/>
+          <Button v-else class="w-2/5" severity="success" label='Log in' icon='pi pi-sign-in' @click='goToSignIn'/>
         </div>
       </template>
     </Menubar>
