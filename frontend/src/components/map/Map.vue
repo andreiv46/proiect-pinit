@@ -42,7 +42,7 @@ const selectedLocation = ref<Location | null>(null)
 
 onMounted(() => {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(getCurrentPosition, () => initializeMap())
+    navigator.geolocation.getCurrentPosition(setCurrentPosition, () => initializeMap())
     console.log(currentLocation.value)
   } else {
     console.log("nu este suportata geolocatia")
@@ -50,7 +50,7 @@ onMounted(() => {
   }
 })
 
-function getCurrentPosition(position: GeolocationPosition) {
+function setCurrentPosition(position: GeolocationPosition) {
   console.log(
       "Latitude: " + position.coords.latitude +
       "Longitude: " + position.coords.longitude
