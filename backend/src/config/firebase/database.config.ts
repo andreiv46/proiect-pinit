@@ -1,11 +1,5 @@
-import admin, {ServiceAccount} from 'firebase-admin'
-import serviceAccount from '../../../proiect-tic-credentials.json'
+import app from "./firebaseAdmin.config";
 
-// @ts-ignore
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount as ServiceAccount)
-})
-
-const db = admin.firestore()
+const db = app.firestore()
 
 export default db

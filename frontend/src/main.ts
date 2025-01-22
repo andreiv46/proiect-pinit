@@ -34,6 +34,7 @@ app.use(PrimeVue, {
         preset: MyPreset
     }
 })
+
 app.use(pinia)
 app.use(ToastService)
 app.directive('ripple', Ripple)
