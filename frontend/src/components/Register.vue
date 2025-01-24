@@ -4,9 +4,10 @@ import InputText from 'primevue/inputtext'
 import {useToast} from 'primevue/usetoast'
 import Toast from 'primevue/toast'
 
-import {ref} from 'vue'
+import {ref, watch} from 'vue'
 import {useAuthStore} from '../store/auth.store.ts'
 import router from '../router/router.ts'
+import {Message, FloatLabel} from "primevue";
 
 const toast = useToast()
 const authStore = useAuthStore()
@@ -14,6 +15,8 @@ const authStore = useAuthStore()
 const emailInput = ref<string>('')
 const passwordInput = ref<string>('')
 const nameInput = ref<string>('')
+const usernameMessage = ref<string>('')
+const usernameSeverity = ref<string>('')
 
 async function toLogin() {
   await router.push('/login')
@@ -51,20 +54,38 @@ async function register() {
         <span class='text-slate-500 dark:text-slate-400 font-medium leading-normal'>Already have an account?</span>
         <span @click='toLogin' class='font-medium no-underline ml-2 text-teal-600 cursor-pointer hover:text-teal-500'>Sign in!</span>
       </div>
-      <div>
-        <label for='name' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Username</label>
-        <InputText v-model='nameInput' id='name' type='text' placeholder='Name' class='w-full mb-4 border-teal-400'/>
-
-        <label for='email' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Email</label>
-        <InputText v-model='emailInput' id='email' type='text' placeholder='Email address'
-                   class='w-full mb-4 border-teal-400'/>
-
-        <label for='password' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Password</label>
-        <InputText v-model='passwordInput' id='password' type='password' placeholder='Password'
-                   class='w-full mb-8 border-teal-400'/>
-
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-1">
+          <FloatLabel variant="in">
+            <InputText v-model='nameInput' id='name' type='text' class='w-full' />
+            <label for="name">Username</label>
+          </FloatLabel>
+          <Message
+              v-if="usernameMessage"
+              :severity="usernameSeverity"
+              size="small"
+              variant="simple"
+          >
+            {{ usernameMessage }}
+          </Message>
+        </div>
+        <div class="flex flex-col gap-1">
+          <FloatLabel variant="in">
+            <InputText v-model='emailInput' id='email' type='text' class='w-full'/>
+            <label for="email">Email</label>
+          </FloatLabel>
+          <!--        <Message v-if="" severity="error" size="small" variant="simple">-->
+          <!--          {{ }}-->
+          <!--        </Message>-->
+        </div>
+        <div class="flex flex-col gap-1">
+          <FloatLabel variant="in">
+            <InputText v-model='passwordInput' id='password' type='password' class='w-full'/>
+            <label for="password">Password</label>
+          </FloatLabel>
+        </div>
         <Button @click='register' label='Sign In' icon='pi pi-user'
-                class='w-full bg-teal-600 hover:bg-teal-500 text-white'/>
+                class='w-full bg-teal-600 hover:bg-teal-500 text-white mt-6'/>
       </div>
     </div>
   </div>

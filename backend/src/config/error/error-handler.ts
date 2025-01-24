@@ -1,20 +1,26 @@
-import {ErrorRequestHandler} from 'express'
+import {Request, Response, NextFunction} from 'express'
 import {CustomError} from './CustomError'
+import log from "../logger/logger";
 
-export const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
+export function errorHandler(
+    err: unknown,
+    _req: Request,
+    res: Response,
+    next: NextFunction
+): void {
     if (res.headersSent) {
-        return next(err)
+        return next(err);
     }
 
     if (err instanceof CustomError) {
-        res.status(err.statusCode).json({message: err.message})
+        res.status(err.statusCode).json({ message: err.message })
         return
     }
 
     if (err instanceof Error) {
-        res.status(500).json({message: err.message})
-        return
+        log.error(err.message, { stack: err.stack });
     }
 
-    res.status(500).json({message: 'Internal server error'})
+    res.status(500).json({ message: "Internal server error" })
+    return
 }

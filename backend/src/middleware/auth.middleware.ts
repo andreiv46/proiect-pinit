@@ -1,7 +1,7 @@
 import {NextFunction, Response} from "express";
 import {AuthorizationHeaderRequiredError, InvalidTokenError, TokenRequiredError} from "../error/auth.error";
 import firebaseAuth from "../config/firebase/auth.config";
-import {ExtendedRequest} from "../config/types";
+import {ExtendedIdToken, ExtendedRequest} from "../config/types";
 import log from "../config/logger/logger";
 import {DecodedIdToken} from "firebase-admin/lib/auth";
 
@@ -19,11 +19,10 @@ export function verifyJWTToken(req: ExtendedRequest, _res: Response, next: NextF
 
     firebaseAuth.verifyIdToken(token)
         .then((decodedToken: DecodedIdToken) => {
-            req.userToken = decodedToken
+            req.userToken = decodedToken as ExtendedIdToken
             next()
         })
-        .catch((error: any) => {
-            log.error(error)
-            throw new InvalidTokenError()
+        .catch(() => {
+            next(new InvalidTokenError())
         })
 }

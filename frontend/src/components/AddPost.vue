@@ -35,6 +35,15 @@ interface AddPostFormDTO {
   isPublic: boolean,
 }
 
+interface CreatePostDTO {
+  title: string,
+  description: string,
+  categories: string[],
+  isPublic: boolean,
+  location: Coordinate,
+  files: File[],
+}
+
 const initialValues = ref<AddPostFormDTO>({
   title: '',
   description: '',
@@ -88,15 +97,6 @@ onMounted(() => {
   }
 })
 
-function initializeMap() {
-  addPostMap.value = L.map('map').setView([currentLocation.value?.coords.latitude || 44.448, currentLocation.value?.coords.longitude || 26.098], 14)
-
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(addPostMap.value)
-  addPostMap.value.on('click', onMapClick);
-}
-
 function setCurrentPosition(position: GeolocationPosition) {
   console.log(
       "Latitude: " + position.coords.latitude +
@@ -104,6 +104,15 @@ function setCurrentPosition(position: GeolocationPosition) {
   )
   currentLocation.value = position
   initializeMap()
+}
+
+function initializeMap() {
+  addPostMap.value = L.map('map').setView([currentLocation.value?.coords.latitude || 44.448, currentLocation.value?.coords.longitude || 26.098], 14)
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(addPostMap.value)
+  addPostMap.value.on('click', onMapClick);
 }
 
 function onMapClick(e: any) {
@@ -142,7 +151,10 @@ function onFormSubmit(e: FormSubmitEvent) {
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
   <div class="flex items-center justify-center flex-col mb-12">
-    <h1 class="text-7xl font-bold mb-12">Add a New Post</h1>
+    <div class="flex flex-col justify-center items-center gap-1">
+      <i class="pi pi-map-marker text-yellow-500" style="font-size: 6rem"></i>
+      <h1 class="text-7xl font-bold mb-12 text-sky-800">Add a New Post</h1>
+    </div>
     <Form v-slot="$form" :initialValues :resolver="resolver" @submit="onFormSubmit"
           validate-on-blur
           class="flex flex-col gap-4 w-full sm:w-72 lg:w-5/12">
@@ -205,7 +217,10 @@ function onFormSubmit(e: FormSubmitEvent) {
           </FileUpload>
         </div>
       </div>
-      <Button class="mt-2" type="submit" severity="primary" label="Submit"/>
+      <div class="flex flex-row gap-2 mt-5">
+        <Button class="w-1/2" type="submit" severity="primary" label="Submit"/>
+        <Button class="w-1/2" severity="danger" label="Cancel"/>
+      </div>
     </Form>
   </div>
 </template>

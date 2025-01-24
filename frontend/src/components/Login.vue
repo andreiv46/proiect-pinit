@@ -8,6 +8,7 @@ import {onMounted, ref} from 'vue'
 import router from '../router/router.ts'
 import {useAuthStore} from '../store/auth.store.ts'
 import {useToast} from 'primevue/usetoast'
+import {FloatLabel} from "primevue";
 
 const emailOnlyChecked = ref<boolean>(false)
 const emailInput = ref<string>('')
@@ -90,17 +91,23 @@ async function handleLogin() {
               class='font-medium no-underline ml-2 text-teal-600 cursor-pointer hover:text-teal-500'>Sign up!</span>
       </div>
 
-      <div>
-        <label for='email' class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Email</label>
-        <InputText v-model='emailInput' id='email' type='text' placeholder='Email address'
-                   class='w-full mb-4 border-teal-400'/>
+      <div class="flex flex-col gap-2">
+        <div class="flex flex-col gap-1">
+          <FloatLabel variant="in">
+            <InputText v-model='emailInput' id='email' type='text' class='w-full'/>
+            <label for="email">Email</label>
+          </FloatLabel>
+        </div>
 
-        <label v-if='!emailOnlyChecked' for='password'
-               class='text-slate-800 dark:text-slate-200 font-medium mb-2 block'>Password</label>
-        <InputText v-if='!emailOnlyChecked' v-model='passwordInput' id='password' type='password' placeholder='Password'
-                   class='w-full mb-4 border-teal-400'/>
+        <div class="flex flex-col gap-1">
+          <FloatLabel variant="in">
+            <InputText v-if='!emailOnlyChecked' v-model='passwordInput' id='password' type='password'
+                       class='w-full'/>
+            <label v-if="!emailOnlyChecked" for="password">Password</label>
+          </FloatLabel>
+        </div>
 
-        <div class='flex items-center justify-between mb-12'>
+        <div class='flex items-center justify-between mb-6'>
           <div class='flex items-center'>
             <Checkbox id='emailOnlyChecked' v-model='emailOnlyChecked' :binary='true' class='mr-2 text-teal-600'/>
             <label for='emailOnlyChecked' class='text-slate-800 dark:text-slate-200'>Sign in without password</label>
