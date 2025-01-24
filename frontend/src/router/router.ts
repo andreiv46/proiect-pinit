@@ -7,6 +7,7 @@ import {useAuthStore} from '../store/auth.store.ts'
 import Test from '../components/Test.vue'
 import SignInResult from '../components/SignInResult.vue'
 import Map from "../components/map/Map.vue";
+import AddPost from "../components/AddPost.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -22,6 +23,10 @@ const router = createRouter({
         },
         {
             path: '/map', component: Map
+        },
+        {
+            path: '/addPost', component: AddPost,
+            meta: {requiresAuth: true}
         },
         {
             path: '/test', component: Test, meta: {

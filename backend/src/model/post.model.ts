@@ -17,7 +17,7 @@ export interface Post {
     userVotes: { [userId: string]: "like" | "dislike" },
     user: string,
     userID: string,
-    visibility: "public" | "private" | "restricted",
+    visibility: "public" | "private",
     createdAt: Timestamp,
     updatedAt: Timestamp,
 }

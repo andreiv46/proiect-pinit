@@ -91,7 +91,7 @@ function onDrawerHide() {
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
   <div class="flex flex-row h-[80vh] justify-center">
-    <div id="map" class=" w-4/5 z-0"></div>
+    <div id="map" class="w-4/5 z-0"></div>
     <Button label='Add' icon='pi pi-user' @click=''/>
   </div>
   <Drawer class="!w-full md:!w-80 lg:!w-[40rem]" v-model:visible="visibleRight" :header="selectedLocation?.name"
