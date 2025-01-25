@@ -1,16 +1,18 @@
 import multer from "multer"
-import path from "path"
 import fs from 'fs'
+import path from "path";
+import {FileFormatNotSupportedError} from "../../error/file.error";
 
-export const createStorage = (storageName: string) => {
+export const createStorageForUserAndPost = (userId: string, postId: string) => {
     return multer.diskStorage({
         destination: function (_req, _file, cb) {
-            cb(null, `./posts/${storageName}`)
+            const uploadPath = `./posts/${userId}/${postId}`
+            cb(null, uploadPath)
         },
         filename: function (_req, file, cb) {
             cb(
                 null,
-                `${storageName}-${Date.now()}${path.extname(file.originalname)}`
+                `${Date.now()}-${file.originalname}`
             )
         },
     })

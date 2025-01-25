@@ -16,6 +16,10 @@ import {
 } from "primevue"
 import * as L from "leaflet"
 import {Marker} from "leaflet"
+import {useAuthStore} from "../store/auth.store.ts";
+import axios from "axios";
+import {setAxiosAuthHeader} from "../api/axios.config.ts";
+import {auth} from "../config/firebase.config.ts";
 
 const toast = useToast()
 const uploadedFiles = ref<File[]>([])
@@ -132,17 +136,40 @@ function onFileUpload(event: FileUploadSelectEvent) {
   console.log('Uploaded files:', uploadedFiles.value)
 }
 
-function onFormSubmit(e: FormSubmitEvent) {
+async function onFormSubmit(e: FormSubmitEvent) {
   if (e.valid) {
     toast.add({severity: 'success', summary: 'Form is submitted.', life: 3000})
-    const formData: AddPostFormDTO = e.values as AddPostFormDTO
-    console.log(formData.title)
-    console.log(formData.description)
-    console.log(formData.categories)
-    console.log(formData.isPublic)
-    console.log(uploadedFiles.value)
+    // const formData: AddPostFormDTO = e.values as AddPostFormDTO
+
+    const data = new FormData();
+    uploadedFiles.value.forEach((file) => {
+      data.append('files', file);
+    });
+
+    const authStore = useAuthStore()
+    const userId = authStore.getCurrentUser?.uid;
+    const postId = '';
+
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    axios
+        .post(`post/${userId}/${postId}/upload`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        .then((response) => {
+          toast.add({ severity: 'success', summary: 'Files uploaded successfully', life: 3000 });
+          console.log(response.data);
+        })
+        .catch((error) => {
+          toast.add({ severity: 'error', summary: 'Failed to upload files', life: 3000 });
+          console.error(error);
+        });
+
     return
   }
+
+
 }
 </script>
 
