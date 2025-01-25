@@ -32,6 +32,7 @@ async function register() {
       localStorage.setItem('token', token)
       localStorage.setItem('refreshToken', refreshToken)
     }
+    await router.push("/")
   } else {
     toast.add({
       severity: 'error',
@@ -45,7 +46,7 @@ async function register() {
 </script>
 
 <template>
-<!--  <Toast/>-->
+  <!--  <Toast/>-->
   <div class='px-6 py-20 md:px-12 lg:px-20'>
     <div class='bg-white dark:bg-slate-800 p-6 shadow-lg rounded-lg w-full lg:w-6/12 mx-auto'>
       <div class='text-center mb-4'>
@@ -57,7 +58,7 @@ async function register() {
       <div class="flex flex-col gap-3">
         <div class="flex flex-col gap-1">
           <FloatLabel variant="in">
-            <InputText v-model='nameInput' id='name' type='text' class='w-full' />
+            <InputText v-model='nameInput' id='name' type='text' class='w-full'/>
             <label for="name">Username</label>
           </FloatLabel>
           <Message

@@ -2,6 +2,7 @@ import db from "../config/firebase/database.config"
 import {NextFunction, Response} from "express"
 import {ExtendedRequest} from "../config/types"
 import { Timestamp } from 'firebase-admin/firestore'
+import {createStorage, createUserPostsDirectory} from "../config/multer/multer.config";
 
 const usersCollection = db.collection('users')
 
@@ -23,6 +24,8 @@ export async function createUser(req: ExtendedRequest, res: Response, next: Next
             createdAt: Timestamp.now(),
             updatedAt: Timestamp.now()
         })
+
+        createUserPostsDirectory(userToken?.uid!)
 
         res.status(201).json({message: "User created successfully"})
     } catch (error: unknown) {

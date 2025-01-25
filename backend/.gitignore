@@ -10,5 +10,6 @@ yarn-error.log*
 .env
 firebase-config.json
 proiect-tic-credentials.json
+/posts/
 
 .vscode/*
