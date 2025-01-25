@@ -13,6 +13,7 @@ import {BroadcastMessage, signInChannel} from '../config/broadcast.config.ts'
 import {computed, ref} from 'vue'
 import {defineStore} from 'pinia'
 import {signOut} from 'firebase/auth'
+import {createUser} from "../api/user.api.ts";
 
 export interface RegisterInput {
     name: string
@@ -59,8 +60,10 @@ export const useAuthStore = defineStore('auth', () => {
             await updateProfile(auth.currentUser!, {
                 displayName: input.name
             })
-            console.log(credentials.user)
+            await auth.currentUser!.getIdToken(true)
+            await createUser()
             currentUser.value = credentials.user
+            console.log(credentials.user)
             return {success: true}
         } catch (error: any) {
             console.error('Registration failed', error.message)
@@ -116,6 +119,7 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             await signOut(auth)
             currentUser.value = null
+
             return {success: true}
         } catch (error: any) {
             console.error('Sign-out failed', error.message)

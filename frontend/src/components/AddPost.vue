@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {Form, FormSubmitEvent} from '@primevue/forms';
-import {zodResolver} from '@primevue/forms/resolvers/zod';
+import {Form, FormSubmitEvent} from '@primevue/forms'
+import {zodResolver} from '@primevue/forms/resolvers/zod'
 import {z} from "zod"
-import {onMounted, ref} from "vue";
-import {useToast} from "primevue/usetoast";
+import {onMounted, ref} from "vue"
+import {useToast} from "primevue/usetoast"
 import {
   Button,
   FileUpload,
@@ -13,14 +13,14 @@ import {
   Message,
   MultiSelect,
   ToggleButton,
-} from "primevue";
-import * as L from "leaflet";
-import {Marker} from "leaflet";
+} from "primevue"
+import * as L from "leaflet"
+import {Marker} from "leaflet"
 
 const toast = useToast()
 const uploadedFiles = ref<File[]>([])
 const selectedMarker = ref<Marker | null>(null)
-const addPostMap = ref();
+const addPostMap = ref()
 const currentLocation = ref<GeolocationPosition | null>(null)
 
 export interface Coordinate {
@@ -67,7 +67,7 @@ const categoryOptions = [
   {name: "Social Issues"},
   {name: "Technology & Innovation"},
   {name: "Local Communities"},
-];
+]
 
 const resolver = ref(zodResolver(
     z.object({
@@ -112,7 +112,7 @@ function initializeMap() {
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(addPostMap.value)
-  addPostMap.value.on('click', onMapClick);
+  addPostMap.value.on('click', onMapClick)
 }
 
 function onMapClick(e: any) {

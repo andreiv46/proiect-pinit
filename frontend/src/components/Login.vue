@@ -80,7 +80,7 @@ async function handleLogin() {
 
 <template>
   <!--  bg-gradient-to-r from-teal-500 to-cyan-400-->
-  <Toast/>
+<!--  <Toast/>-->
   <div class='px-6 py-20 md:px-12 lg:px-20'>
     <div class='bg-white dark:bg-slate-800 p-6 shadow-lg rounded-lg w-full lg:w-6/12 mx-auto'>
       <div class='text-center mb-4'>

@@ -41,10 +41,10 @@ export async function existingUsername(
             .get()
         if (!existingUserSnapshot.empty) {
             res.status(200).json({message: "Username already exists"})
+            return
         }
         res.status(404).json({message: "Username does not exist"})
     } catch (error: unknown) {
         next(error)
     }
-
 }
