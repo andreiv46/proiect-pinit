@@ -27,3 +27,11 @@ export function createUserPostsDirectory(uid: string) {
         fs.mkdirSync(directoryPath, {recursive: true})
     }
 }
+
+export function createPostDirectory(uid: string, postId: string) {
+    const directoryPath = `./posts/${uid}/${postId}`
+    if (!fs.existsSync(directoryPath)) {
+        return fs.mkdirSync(directoryPath, {recursive: true})
+    }
+    return directoryPath
+}

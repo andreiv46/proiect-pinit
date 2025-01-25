@@ -1,4 +1,4 @@
-import {Timestamp} from 'firebase/firestore'
+import {Timestamp} from 'firebase-admin/firestore'
 
 export interface Coordinate {
     latitude: number,
@@ -6,12 +6,14 @@ export interface Coordinate {
 }
 
 export interface Post {
-    id: string,
     title: string,
-    coordinates: Coordinate,
+    location: Coordinate,
     categories: string[]
     description: string,
-    mediaFilePath: string,
+    files: Array<{
+        url: string;
+        type: string;
+    }>,
     likes: number,
     dislikes: number,
     userVotes: { [userId: string]: "like" | "dislike" },

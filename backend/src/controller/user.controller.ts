@@ -1,8 +1,8 @@
 import db from "../config/firebase/database.config"
 import {NextFunction, Response} from "express"
 import {ExtendedRequest} from "../config/types"
-import { Timestamp } from 'firebase-admin/firestore'
-import {createStorage, createUserPostsDirectory} from "../config/multer/multer.config";
+import {Timestamp} from 'firebase-admin/firestore'
+import {createUserPostsDirectory} from "../config/multer/multer.config";
 
 const usersCollection = db.collection('users')
 
