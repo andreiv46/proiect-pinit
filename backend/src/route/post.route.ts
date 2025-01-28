@@ -9,6 +9,6 @@ const router = Router()
 router
     .get("/", getPosts)
     .post("/", verifyJWTToken, validateSchema(createPostSchema), createPost)
-    .post("/:userId/:postId/upload", verifyJWTToken, uploadFilesToPostController)
+    .patch("/:userId/:postId/upload", verifyJWTToken, uploadFilesToPostController)
 
 export default router

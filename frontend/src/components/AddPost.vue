@@ -16,10 +16,7 @@ import {
 } from "primevue"
 import * as L from "leaflet"
 import {Marker} from "leaflet"
-import {useAuthStore} from "../store/auth.store.ts";
-import axios from "axios";
-import {setAxiosAuthHeader} from "../api/axios.config.ts";
-import {auth} from "../config/firebase.config.ts";
+import {createPost, uploadPostFiles} from "../api/post.api.ts";
 
 const toast = useToast()
 const uploadedFiles = ref<File[]>([])
@@ -35,17 +32,12 @@ export interface Coordinate {
 interface AddPostFormDTO {
   title: string,
   description: string,
-  categories: [],
+  categories: string[],
   isPublic: boolean,
 }
 
-interface CreatePostDTO {
-  title: string,
-  description: string,
-  categories: string[],
-  isPublic: boolean,
+export interface CreatePostDTO extends AddPostFormDTO {
   location: Coordinate,
-  files: File[],
 }
 
 const initialValues = ref<AddPostFormDTO>({
@@ -139,37 +131,54 @@ function onFileUpload(event: FileUploadSelectEvent) {
 async function onFormSubmit(e: FormSubmitEvent) {
   if (e.valid) {
     toast.add({severity: 'success', summary: 'Form is submitted.', life: 3000})
-    // const formData: AddPostFormDTO = e.values as AddPostFormDTO
 
-    const data = new FormData();
-    uploadedFiles.value.forEach((file) => {
-      data.append('files', file);
-    });
+    if (selectedMarker.value === null) {
+      toast.add({severity: 'error', summary: 'Please select a location on the map.', life: 3000})
+      return
+    }
 
-    const authStore = useAuthStore()
-    const userId = authStore.getCurrentUser?.uid;
-    const postId = '';
+    if (uploadedFiles.value.length === 0) {
+      toast.add({severity: 'error', summary: 'Please upload at least one file.', life: 3000})
+      return
+    }
 
-    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
-    axios
-        .post(`post/${userId}/${postId}/upload`, data, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        })
-        .then((response) => {
-          toast.add({ severity: 'success', summary: 'Files uploaded successfully', life: 3000 });
-          console.log(response.data);
-        })
-        .catch((error) => {
-          toast.add({ severity: 'error', summary: 'Failed to upload files', life: 3000 });
-          console.error(error);
-        });
+    if (uploadedFiles.value.length > 5) {
+      toast.add({severity: 'error', summary: 'You can upload at most 5 files.', life: 3000})
+      return
+    }
+
+    const addPostDTO: AddPostFormDTO = e.values as AddPostFormDTO
+    const createPostDTO: CreatePostDTO = {
+      ...addPostDTO,
+      categories: addPostDTO.categories.map((category) => category.name),
+      location: {
+        latitude: selectedMarker.value?.getLatLng().lat!,
+        longitude: selectedMarker.value?.getLatLng().lng!
+      }
+    }
+    console.log(createPostDTO)
+
+    try {
+      const response = await createPost(createPostDTO)
+      const postId = response.data.post.id
+      toast.add({severity: 'success', summary: 'Post created successfully', life: 3000})
+      console.log(postId)
+
+      const data = new FormData()
+      uploadedFiles.value.forEach((file) => {
+        data.append('files', file)
+      })
+
+      const uploadResponse = await uploadPostFiles(data, postId)
+      toast.add({ severity: 'success', summary: 'Files uploaded successfully', life: 3000 })
+      console.log(uploadResponse.data)
+    } catch (error) {
+      toast.add({severity: 'error', summary: 'Failed to create post or upload files', life: 3000})
+      console.error(error)
+    }
 
     return
   }
-
-
 }
 </script>
 
