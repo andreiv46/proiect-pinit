@@ -8,12 +8,16 @@ import {Timestamp} from 'firebase-admin/firestore'
 import {createPostDirectory} from "../config/multer/multer.config";
 import {PostNotFoundError} from "../error/post.error";
 import {uploadPostsFiles} from "../middleware/file.middleware";
+import {blobServiceClient} from "../config/azure/blob-storage.config";
+import {ContainerClient} from "@azure/storage-blob";
 
 const postsCollection = db.collection('posts')
 
-export async function getPosts(_req: ExtendedRequest, res: Response, next: NextFunction) {
+export async function getPublicPosts(_req: ExtendedRequest, res: Response, next: NextFunction) {
     try {
-        const postsSnapshot = await postsCollection.get()
+        const postsSnapshot = await postsCollection
+            .where("visibility", "==", "public")
+            .get()
         const posts: Post[] = postsSnapshot.docs.map(
             doc => documentWithId<Post>(doc))
         res.status(200).json(posts)
@@ -63,14 +67,14 @@ export async function createPost(
 }
 
 export async function uploadFilesToPostController(
-    req: ExtendedRequest<{userId: string, postId: string}, {}, {}, {}>,
+    req: ExtendedRequest<{ userId: string, postId: string }, {}, {}, {}>,
     res: Response,
     next: NextFunction) {
     try {
         const {userId, postId} = req.params
         const userToken = req.userToken
 
-        if (userToken?.uid !== userId){
+        if (userToken?.uid !== userId) {
             res.status(403).json({message: "Unauthorized"})
             return
         }
@@ -82,7 +86,7 @@ export async function uploadFilesToPostController(
         }
 
         const postData = postSnapshot.data();
-        if (postData?.userID !== userId){
+        if (postData?.userID !== userId) {
             res.status(403).json({message: "Unauthorized"})
             return
         }
@@ -94,22 +98,40 @@ export async function uploadFilesToPostController(
             }
 
             const uploadedFiles = req.files as Express.Multer.File[];
-            const fileUrls = uploadedFiles.map(file => ({
-                url: `./posts/${userId}/${postId}/${file.filename}`,
-                type: file.mimetype,
-            }));
 
-            const updatedFiles = [...(postData.files || []), ...fileUrls];
+            const postFilesContainer = blobServiceClient.getContainerClient("postfiles")
+            const fileUrls = await Promise.all(
+                uploadedFiles.map((file) => uploadToAzureBlob(file, userId, postId, postFilesContainer))
+            )
+
+            const updatedFiles = [...(postData.files || []), ...fileUrls.map((url, index) => ({
+                url,
+                type: uploadedFiles[index].mimetype,
+            }))]
 
             await postsCollection.doc(postId).update({
                 files: updatedFiles,
                 updatedAt: Timestamp.now(),
             });
 
-            res.status(200).json({ message: "Files uploaded and post updated successfully" });
+            res.status(200).json({message: "Files uploaded and post updated successfully"});
         })
 
     } catch (error: unknown) {
         next(error)
     }
+}
+
+async function uploadToAzureBlob(file: Express.Multer.File, userId: string, postId: string, blobContainer: ContainerClient): Promise<string> {
+
+    await blobContainer.createIfNotExists();
+
+    const blobName = `${userId}/${postId}/${file.originalname}`;
+    const blockBlobClient = blobContainer.getBlockBlobClient(blobName);
+
+    await blockBlobClient.uploadData(file.buffer, {
+        blobHTTPHeaders: {blobContentType: file.mimetype},
+    });
+
+    return blockBlobClient.url;
 }

@@ -13,7 +13,7 @@ export async function createUser(req: ExtendedRequest, res: Response, next: Next
             .where("displayName", "==", userToken?.name)
             .get()
 
-        if (!existingUserSnapshot.empty){
+        if (!existingUserSnapshot.empty) {
             res.status(400).json({message: "User already exists"})
             return
         }

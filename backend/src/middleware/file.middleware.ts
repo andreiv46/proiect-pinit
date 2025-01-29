@@ -1,9 +1,8 @@
 import "dotenv/config"
 import fs from "fs"
-import multer from "multer"
+import multer, {memoryStorage} from "multer"
 import path from "path"
 import {FileFormatNotSupportedError} from "../error/file.error"
-import {createStorageForUserAndPost} from "../config/multer/multer.config"
 
 export const ALLOWED_MIME_TYPES = [
     "image/jpeg",
@@ -12,7 +11,7 @@ export const ALLOWED_MIME_TYPES = [
     "video/mp4",
 ]
 export const ALLOWED_FILE_TYPES = /jpeg|png|jpg|mp4/
-export const MAX_FILE_SIZE = 1024 * 1024 * 0.5
+export const MAX_FILE_SIZE = 1024 * 1024 * 2 //2mb maxim
 
 export const uploadPostsFiles = (userId: string, postId: string) => {
     const directoryPath = `./posts/${userId}/${postId}`
@@ -21,7 +20,7 @@ export const uploadPostsFiles = (userId: string, postId: string) => {
     }
 
     return multer({
-        storage: createStorageForUserAndPost(userId, postId),
+        storage: memoryStorage(),
         limits: {
             fileSize: MAX_FILE_SIZE,
         },
