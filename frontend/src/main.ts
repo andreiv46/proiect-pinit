@@ -8,9 +8,10 @@ import ToastService, {ToastServiceMethods} from 'primevue/toastservice'
 import {definePreset} from '@primevue/themes'
 import Ripple from 'primevue/ripple'
 import {createPinia} from 'pinia'
-import {configureAxios} from "./api/axios.config.ts";
-import {VueQueryPlugin} from "@tanstack/vue-query";
-import {Toast} from "primevue";
+import {configureAxios} from "./api/axios.config.ts"
+import {VueQueryPlugin} from "@tanstack/vue-query"
+import {Toast} from "primevue"
+import Tooltip from 'primevue/tooltip'
 
 const MyPreset = definePreset(Aura, {
     semantic: {
@@ -41,6 +42,7 @@ app.use(pinia)
 app.use(ToastService)
 app.component('Toast', Toast)
 app.directive('ripple', Ripple)
+app.directive('tooltip', Tooltip)
 app.use(router)
 app.use(VueQueryPlugin)
 app.mount('#app')

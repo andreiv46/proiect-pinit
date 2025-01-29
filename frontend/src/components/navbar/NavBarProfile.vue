@@ -31,8 +31,8 @@ function toggle(event: Event) {
       <Avatar size="xlarge"
               image='https://primefaces.org/cdn/primevue/images/organization/walter.jpg'/>
       <div class="flex flex-col items-center justify-center ">
-        <span class="font-medium">{{authStore.getCurrentUser?.displayName}}</span>
-        <span class="text-sm text-surface-500 dark:text-surface-400">@{{
+        <span class="font-medium">#{{authStore.getCurrentUser?.displayName}}</span>
+        <span class="text-sm text-surface-500 dark:text-surface-400">{{
             authStore.getCurrentUser?.email
           }}</span>
       </div>

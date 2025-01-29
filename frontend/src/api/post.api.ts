@@ -23,6 +23,11 @@ export async function createPost(data: CreatePostDTO) {
     return await axios.post(`${postRoute}`, data)
 }
 
+export async function getPublicPosts(){
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.get(`${postRoute}`)
+}
 
 export interface Coordinate {
     latitude: number,

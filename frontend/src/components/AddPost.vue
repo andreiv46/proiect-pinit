@@ -244,7 +244,7 @@ async function onFormSubmit(e: FormSubmitEvent) {
                       @select="onFileUpload"
                       class="w-full"
                       :choose-button-props="{ class: 'p-button-secondary w-full'}"
-                      accept="image/*, video/*" :maxFileSize="500000">
+                      accept="image/*, video/*" :maxFileSize="2000000">
             <template #empty>
               <div class="flex justify-center items-center">
                 <i class="pi pi-cloud-upload" style="font-size: 6rem"></i>
