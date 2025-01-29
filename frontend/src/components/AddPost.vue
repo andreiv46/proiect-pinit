@@ -254,8 +254,8 @@ async function onFormSubmit(e: FormSubmitEvent) {
         </div>
       </div>
       <div class="flex flex-row gap-2 mt-5">
-        <Button class="w-1/2" type="submit" severity="primary" label="Submit"/>
-        <Button class="w-1/2" severity="danger" label="Cancel"/>
+        <Button class="w-1/2" type="submit" severity="primary" label="Submit" />
+        <Button class="w-1/2" severity="danger" label="Cancel" />
       </div>
     </Form>
   </div>

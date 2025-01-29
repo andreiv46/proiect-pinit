@@ -3,15 +3,34 @@ import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
 import {LatLngTuple, Marker} from 'leaflet';
 import {onMounted, ref} from "vue";
-import {Avatar, Button, Carousel, Chip, Drawer} from "primevue";
-import {getPublicPosts, Post} from "../../api/post.api.ts";
-import {useToast} from "primevue/usetoast";
+import {Avatar, Button, Carousel, Chip, Drawer, MultiSelect} from "primevue"
+import {getPublicPosts, Post} from "../../api/post.api.ts"
+import {useToast} from "primevue/usetoast"
+
+const categoryOptions = [
+  {name: "Sports"},
+  {name: "Entertainment"},
+  {name: "News"},
+  {name: "Technology"},
+  {name: "Lifestyle"},
+  {name: "Events"},
+  {name: "Nature"},
+  {name: "Education"},
+  {name: "Community"},
+  {name: "Art & Culture"},
+  {name: "Business"},
+  {name: "Science"},
+  {name: "Social Issues"},
+  {name: "Technology & Innovation"},
+  {name: "Local Communities"},
+]
 
 const toast = useToast()
 const currentLocation = ref<GeolocationPosition | null>(null)
 const initialMap = ref();
 const posts = ref<Post[]>([])
 const visibleRight = ref(false)
+const visibleLeft = ref(false)
 const markers = ref<Marker[]>([])
 const selectedPost = ref<Post | null>(null)
 
@@ -67,15 +86,43 @@ function onDrawerHide() {
   selectedPost.value = null;
 }
 
+function openFilter() {
+  visibleLeft.value = true;
+}
 </script>
 
 <template>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
-  <div class="flex flex-row h-[80vh] justify-center">
-    <div id="map" class="w-4/5 z-0"></div>
-    <Button label='Add' icon='pi pi-user' @click=''/>
+  <div class="relative flex flex-row h-[90vh]">
+    <Drawer class="!w-full md:!w-80 lg:!w-[40rem]" v-model:visible="visibleLeft"
+            position="left" @hide="onDrawerHide">
+      <template #header>
+        <div class="flex items-center gap-2">
+          <span class="font-bold text-6xl">Filter posts</span>
+        </div>
+      </template>
+      <div class="flex flex-row gap-5">
+        <MultiSelect name="categories" :options="categoryOptions" optionLabel="name" filter display="chip"
+                     placeholder="Categories"
+                     size="large"
+                     :maxSelectedLabels="3" class="w-full"/>
+      </div>
+      <template #footer>
+        <div class="flex items-center gap-2">
+          <Button label="Apply filters" icon="pi pi-filter" class="flex-auto" outlined></Button>
+          <Button label="Clear filters" icon="pi pi-filter-slash" class="flex-auto" severity="danger" text></Button>
+        </div>
+      </template>
+    </Drawer>
+    <Button
+        severity="secondary"
+        icon="pi pi-search"
+        @click="openFilter"
+        class="absolute top left lg:top-auto lg:left-auto lg:right lg:bottom lg:relative lg:w-1/12"
+    />
+    <div id="map" class="w-full z-0"></div>
   </div>
   <Drawer class="!w-full md:!w-80 lg:!w-[40rem]" v-model:visible="visibleRight"
           position="right" @hide="onDrawerHide">

@@ -50,7 +50,7 @@ async function goToSignIn(){
 </script>
 
 <template>
-  <div class='card sticky top-0 z-50 mb-4'>
+  <div class='card sticky top-0 z-50'>
     <Menubar :model='items'>
       <template #start>
         <img @click='toHome' src='/ecopin.svg'

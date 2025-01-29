@@ -36,8 +36,8 @@ function toggle(event: Event) {
             authStore.getCurrentUser?.email
           }}</span>
       </div>
-      <Button class="w-full" severity="info" label='Profile' icon='pi pi-user'/>
-      <Button class="w-full" severity="danger" label='Log out' icon='pi pi-sign-out' @click='logout'/>
+      <Button class="w-full" severity="info" label='Profile' icon='pi pi-user' outlined/>
+      <Button class="w-full" severity="danger" label='Log out' icon='pi pi-sign-out' @click='logout' outlined/>
     </div>
   </Popover>
 </template>
