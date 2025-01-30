@@ -2,7 +2,7 @@
 import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
 import {LatLngTuple, Marker} from 'leaflet';
-import {onMounted, ref} from "vue";
+import {onMounted, ref, toRaw} from "vue";
 import {Avatar, Button, Carousel, Chip, Drawer, MultiSelect} from "primevue"
 import {getPublicPosts, Post} from "../../api/post.api.ts"
 import {useToast} from "primevue/usetoast"
@@ -33,6 +33,7 @@ const visibleRight = ref(false)
 const visibleLeft = ref(false)
 const markers = ref<Marker[]>([])
 const selectedPost = ref<Post | null>(null)
+const selectedCategoriesFilter = ref<[] | null>(null)
 
 onMounted(async () => {
   try {
@@ -44,7 +45,6 @@ onMounted(async () => {
     toast.add({severity: 'error', summary: 'Failed to fetch posts', life: 3000})
     console.error(error)
   }
-
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(setCurrentPosition, () => initializeMap(posts.value))
     console.log(currentLocation.value)
@@ -70,9 +70,14 @@ function initializeMap(posts: Post[]) {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
   }).addTo(initialMap.value)
 
+  markers.value = []
+  drawMarkers(posts)
+}
+
+function drawMarkers(posts: Post[]){
   posts.forEach(post => {
     const marker = L.marker([post.location.latitude, post.location.longitude] as LatLngTuple)
-        .addTo(initialMap.value)
+        .addTo(toRaw(initialMap.value))
         .on('click', () => {
           selectedPost.value = post
           visibleRight.value = true
@@ -80,6 +85,40 @@ function initializeMap(posts: Post[]) {
         .bindTooltip(post.title)
     markers.value.push(marker)
   })
+}
+
+function clearMarkers() {
+  if (!initialMap.value) return
+  markers.value.forEach(marker => {
+    if (initialMap.value.hasLayer(marker)) {
+      initialMap.value.removeLayer(marker);
+    }
+  });
+  markers.value = []
+}
+
+function applyFilters(){
+  if (!selectedCategoriesFilter.value || selectedCategoriesFilter.value.length === 0) {
+    clearMarkers()
+    drawMarkers(posts.value)
+    return;
+  }
+
+  const selectedCategories = selectedCategoriesFilter.value.map(c => c.name);
+
+  const filteredPosts = posts.value.filter(post =>
+      selectedCategories.every(category => post.categories.includes(category))
+  )
+
+  clearMarkers()
+  drawMarkers(filteredPosts)
+}
+
+function clearFilters() {
+  if(selectedCategoriesFilter.value === null) return
+  selectedCategoriesFilter.value = null
+  clearMarkers()
+  drawMarkers(posts.value)
 }
 
 function onDrawerHide() {
@@ -105,14 +144,15 @@ function openFilter() {
       </template>
       <div class="flex flex-row gap-5">
         <MultiSelect name="categories" :options="categoryOptions" optionLabel="name" filter display="chip"
+                     v-model="selectedCategoriesFilter"
                      placeholder="Categories"
                      size="large"
                      :maxSelectedLabels="3" class="w-full"/>
       </div>
       <template #footer>
         <div class="flex items-center gap-2">
-          <Button label="Apply filters" icon="pi pi-filter" class="flex-auto" outlined></Button>
-          <Button label="Clear filters" icon="pi pi-filter-slash" class="flex-auto" severity="danger" text></Button>
+          <Button label="Apply filters" @click="applyFilters" icon="pi pi-filter" class="flex-auto" outlined></Button>
+          <Button label="Clear filters" @click="clearFilters" icon="pi pi-filter-slash" class="flex-auto" severity="danger" text></Button>
         </div>
       </template>
     </Drawer>

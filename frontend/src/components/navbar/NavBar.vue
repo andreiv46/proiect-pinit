@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import {ref} from 'vue'
-import {InputGroup, InputGroupAddon, InputText, Menubar} from 'primevue'
+import {InputGroup, InputGroupAddon, InputText, Menubar, Badge} from 'primevue'
 import {useAuthStore} from '../../store/auth.store.ts'
 import router from '../../router/router.ts'
 import NavBarProfile from "./NavBarProfile.vue";
