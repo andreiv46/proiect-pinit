@@ -35,6 +35,12 @@ export async function getUserPosts(){
     return await axios.get(`${postRoute}/${authStore.getCurrentUser?.uid}/posts`)
 }
 
+export async function deletePost(postId: string){
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.delete(`${postRoute}/${postId}`)
+}
+
 export interface Coordinate {
     latitude: number,
     longitude: number

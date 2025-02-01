@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import {nextTick, onMounted, ref, toRaw} from "vue";
-import {getUserPosts, Post} from "../api/post.api.ts";
+import {deletePost, getUserPosts, Post} from "../api/post.api.ts";
 import {useToast} from "primevue/usetoast";
 import {
   Button,
@@ -24,7 +24,7 @@ import {LatLngTuple} from "leaflet";
 const posts = ref<Post[]>([])
 const toast = useToast()
 const postMap = ref()
-const selectedPost = ref()
+const selectedPost = ref<Post | null>(null)
 const confirm = useConfirm()
 
 const filters = ref({
@@ -134,7 +134,7 @@ function initializeMap(post: Post) {
 function onDeleteConfirmation() {
   confirm.require({
     message: 'The post will be permanently deleted',
-    header: `Delete ${selectedPost.value.title}`,
+    header: `Delete post`,
     icon: 'pi pi-info-circle',
     rejectLabel: 'Cancel',
     rejectProps: {
@@ -146,8 +146,20 @@ function onDeleteConfirmation() {
       label: 'Delete',
       severity: 'danger'
     },
-    accept: () => {
-      toast.add({severity: 'info', summary: 'Confirmed', detail: `Post ${selectedPost.value.title} deleted`, life: 3000});
+    accept: async () => {
+      try {
+        await deletePost(selectedPost.value?.id!)
+        posts.value = posts.value.filter(post => post.id !== selectedPost.value?.id)
+        toast.add({
+          severity: 'info',
+          summary: 'Confirmed',
+          detail: `Post ${selectedPost.value?.title} deleted`,
+          life: 3000
+        })
+      } catch (error) {
+        toast.add({severity: 'error', summary: 'Failed to delete post', life: 3000})
+        console.error(error)
+      }
     },
     // reject: () => {
     //   toast.add({severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000});

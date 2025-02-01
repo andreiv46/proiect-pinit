@@ -5,7 +5,6 @@ import {Post} from "../model/post.model"
 import {ExtendedRequest} from "../config/types"
 import {CreatePostInput} from "../schema/post.schema"
 import {Timestamp} from 'firebase-admin/firestore'
-import {createPostDirectory} from "../config/multer/multer.config";
 import {PostNotFoundError} from "../error/post.error";
 import {uploadPostsFiles} from "../middleware/file.middleware";
 import {blobServiceClient} from "../config/azure/blob-storage.config";
@@ -13,6 +12,7 @@ import {ContainerClient} from "@azure/storage-blob";
 import {UnauthorizedError} from "../error/auth.error";
 
 const postsCollection = db.collection('posts')
+const postFilesContainer = blobServiceClient.getContainerClient("postfiles")
 
 export async function getPublicPosts(_req: ExtendedRequest, res: Response, next: NextFunction) {
     try {
@@ -30,11 +30,11 @@ export async function getPublicPosts(_req: ExtendedRequest, res: Response, next:
 export async function getUserPosts(
     req: ExtendedRequest<{ userId: string }, {}, {}, {}>,
     res: Response,
-    next: NextFunction){
+    next: NextFunction) {
     try {
         const userToken = req.userToken
         const userId = req.params.userId
-        if(userToken?.uid !== userId){
+        if (userToken?.uid !== userId) {
             throw new UnauthorizedError()
         }
 
@@ -44,6 +44,36 @@ export async function getUserPosts(
         const posts: Post[] = postsSnapshot.docs.map(
             doc => documentWithId<Post>(doc))
         res.status(200).json(posts)
+    } catch (error: unknown) {
+        next(error)
+    }
+}
+
+export async function deletePost(
+    req: ExtendedRequest<{ postId: string }, {}, {}, {}>,
+    res: Response,
+    next: NextFunction) {
+    try {
+        const userToken = req.userToken
+        const {postId} = req.params
+
+        const postSnapshot = await postsCollection.doc(postId).get();
+
+        if (!postSnapshot.exists) {
+            throw new PostNotFoundError()
+        }
+
+        const postData = postSnapshot.data();
+        if (postData?.userID !== userToken?.uid) {
+            throw new UnauthorizedError()
+        }
+
+        await deletePostFromAzureBlob(userToken?.uid!, postId, postFilesContainer)
+
+        await postsCollection.doc(postId).delete()
+
+        res.status(200).json({message: "Post deleted successfully"})
+
     } catch (error: unknown) {
         next(error)
     }
@@ -74,8 +104,6 @@ export async function createPost(
         }
 
         const postRef = await postsCollection.add(newPost)
-
-        createPostDirectory(userToken?.uid!, postRef.id)
 
         res.status(201).json({
             message: "Post created successfully",
@@ -110,8 +138,7 @@ export async function uploadFilesToPostController(
 
         const postData = postSnapshot.data();
         if (postData?.userID !== userId) {
-            res.status(403).json({message: "Unauthorized"})
-            return
+            throw new UnauthorizedError()
         }
 
         const upload = uploadPostsFiles(userId, postId)
@@ -122,7 +149,6 @@ export async function uploadFilesToPostController(
 
             const uploadedFiles = req.files as Express.Multer.File[];
 
-            const postFilesContainer = blobServiceClient.getContainerClient("postfiles")
             const fileUrls = await Promise.all(
                 uploadedFiles.map((file) => uploadToAzureBlob(file, userId, postId, postFilesContainer))
             )
@@ -157,4 +183,15 @@ async function uploadToAzureBlob(file: Express.Multer.File, userId: string, post
     });
 
     return blockBlobClient.url;
+}
+
+async function deletePostFromAzureBlob(userId: string, postId: string, blobContainer: ContainerClient){
+    const prefix = `${userId}/${postId}`
+    const blobs = blobContainer.listBlobsFlat({ prefix })
+
+    for await (const blob of blobs) {
+        const blobClient = blobContainer.getBlobClient(blob.name)
+        await blobClient.deleteIfExists()
+        console.log(`Deleted: ${blob.name}`)
+    }
 }
