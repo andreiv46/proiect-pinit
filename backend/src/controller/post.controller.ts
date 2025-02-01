@@ -10,6 +10,7 @@ import {PostNotFoundError} from "../error/post.error";
 import {uploadPostsFiles} from "../middleware/file.middleware";
 import {blobServiceClient} from "../config/azure/blob-storage.config";
 import {ContainerClient} from "@azure/storage-blob";
+import {UnauthorizedError} from "../error/auth.error";
 
 const postsCollection = db.collection('posts')
 
@@ -17,6 +18,28 @@ export async function getPublicPosts(_req: ExtendedRequest, res: Response, next:
     try {
         const postsSnapshot = await postsCollection
             .where("visibility", "==", "public")
+            .get()
+        const posts: Post[] = postsSnapshot.docs.map(
+            doc => documentWithId<Post>(doc))
+        res.status(200).json(posts)
+    } catch (error: unknown) {
+        next(error)
+    }
+}
+
+export async function getUserPosts(
+    req: ExtendedRequest<{ userId: string }, {}, {}, {}>,
+    res: Response,
+    next: NextFunction){
+    try {
+        const userToken = req.userToken
+        const userId = req.params.userId
+        if(userToken?.uid !== userId){
+            throw new UnauthorizedError()
+        }
+
+        const postsSnapshot = await postsCollection
+            .where("userID", "==", userId)
             .get()
         const posts: Post[] = postsSnapshot.docs.map(
             doc => documentWithId<Post>(doc))

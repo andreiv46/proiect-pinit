@@ -4,8 +4,10 @@ import * as L from 'leaflet';
 import {LatLngTuple, Marker} from 'leaflet';
 import {onMounted, ref, toRaw} from "vue";
 import {Avatar, Button, Carousel, Chip, Drawer, MultiSelect} from "primevue"
+import Select from 'primevue/select'
 import {getPublicPosts, Post} from "../../api/post.api.ts"
 import {useToast} from "primevue/usetoast"
+import {Timestamp} from "firebase/firestore";
 
 const categoryOptions = [
   {name: "Sports"},
@@ -25,6 +27,13 @@ const categoryOptions = [
   {name: "Local Communities"},
 ]
 
+const periodFilterOptions = [
+  {name: "Today"},
+  {name: "This week"},
+  {name: "This month"},
+  {name: "This year"},
+]
+
 const toast = useToast()
 const currentLocation = ref<GeolocationPosition | null>(null)
 const initialMap = ref();
@@ -34,6 +43,7 @@ const visibleLeft = ref(false)
 const markers = ref<Marker[]>([])
 const selectedPost = ref<Post | null>(null)
 const selectedCategoriesFilter = ref<[] | null>(null)
+const selectedPeriodFilter = ref<{ name: string } | null>({name: "Today"})
 
 onMounted(async () => {
   try {
@@ -74,7 +84,7 @@ function initializeMap(posts: Post[]) {
   drawMarkers(posts)
 }
 
-function drawMarkers(posts: Post[]){
+function drawMarkers(posts: Post[]) {
   posts.forEach(post => {
     const marker = L.marker([post.location.latitude, post.location.longitude] as LatLngTuple)
         .addTo(toRaw(initialMap.value))
@@ -97,25 +107,60 @@ function clearMarkers() {
   markers.value = []
 }
 
-function applyFilters(){
-  if (!selectedCategoriesFilter.value || selectedCategoriesFilter.value.length === 0) {
-    clearMarkers()
-    drawMarkers(posts.value)
-    return;
+function applyFilters() {
+  // if (!selectedCategoriesFilter.value || selectedCategoriesFilter.value.length === 0) {
+  //   clearMarkers()
+  //   drawMarkers(posts.value)
+  //   return;
+  // }
+  //
+  // const selectedCategories = selectedCategoriesFilter.value.map(c => c.name);
+  //
+  // let filteredPosts = posts.value.filter(post =>
+  //     selectedCategories.every(category => post.categories.includes(category))
+  // )
+
+  let filteredPosts = [...posts.value]
+
+  if (selectedCategoriesFilter.value && selectedCategoriesFilter.value.length > 0) {
+    const selectedCategories = selectedCategoriesFilter.value.map(c => c.name);
+    filteredPosts = filteredPosts.filter(post =>
+        selectedCategories.every(category => post.categories.includes(category))
+    );
   }
 
-  const selectedCategories = selectedCategoriesFilter.value.map(c => c.name);
+  console.log('here1', selectedPeriodFilter.value)
 
-  const filteredPosts = posts.value.filter(post =>
-      selectedCategories.every(category => post.categories.includes(category))
-  )
+  if (selectedPeriodFilter.value) {
+    const now = new Date();
+    let cutoffDate = new Date();
+
+    console.log('here', selectedPeriodFilter.value)
+
+    switch (selectedPeriodFilter.value.name) {
+      case "Today":
+        cutoffDate.setHours(0, 0, 0, 0)
+        break;
+      case "This week":
+        cutoffDate.setDate(now.getDate() - 7)
+        break;
+      case "This month":
+        cutoffDate.setMonth(now.getMonth() - 1)
+        break;
+      case "This year":
+        cutoffDate.setFullYear(now.getFullYear() - 1)
+        break;
+    }
+
+    filteredPosts = filteredPosts.filter(post => new Date(post.createdAt._seconds * 1000) >= cutoffDate)
+  }
 
   clearMarkers()
   drawMarkers(filteredPosts)
 }
 
 function clearFilters() {
-  if(selectedCategoriesFilter.value === null) return
+  if (selectedCategoriesFilter.value === null) return
   selectedCategoriesFilter.value = null
   clearMarkers()
   drawMarkers(posts.value)
@@ -142,17 +187,23 @@ function openFilter() {
           <span class="font-bold text-6xl">Filter posts</span>
         </div>
       </template>
-      <div class="flex flex-row gap-5">
+      <div class="flex flex-col gap-5">
         <MultiSelect name="categories" :options="categoryOptions" optionLabel="name" filter display="chip"
                      v-model="selectedCategoriesFilter"
                      placeholder="Categories"
                      size="large"
                      :maxSelectedLabels="3" class="w-full"/>
+        <div class="card flex justify-center">
+          <Select v-model="selectedPeriodFilter" :options="periodFilterOptions" optionLabel="name"
+                  placeholder="Select a period"
+                  class="w-full"/>
+        </div>
       </div>
       <template #footer>
         <div class="flex items-center gap-2">
           <Button label="Apply filters" @click="applyFilters" icon="pi pi-filter" class="flex-auto" outlined></Button>
-          <Button label="Clear filters" @click="clearFilters" icon="pi pi-filter-slash" class="flex-auto" severity="danger" text></Button>
+          <Button label="Clear filters" @click="clearFilters" icon="pi pi-filter-slash" class="flex-auto"
+                  severity="danger" text></Button>
         </div>
       </template>
     </Drawer>

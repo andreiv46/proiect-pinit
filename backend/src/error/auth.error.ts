@@ -17,3 +17,9 @@ export class TokenRequiredError extends CustomError {
         super(message, 401);
     }
 }
+
+export class UnauthorizedError extends CustomError {
+    constructor(message = "Unauthorized") {
+        super(message, 403);
+    }
+}

@@ -29,6 +29,12 @@ export async function getPublicPosts(){
     return await axios.get(`${postRoute}`)
 }
 
+export async function getUserPosts(){
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.get(`${postRoute}/${authStore.getCurrentUser?.uid}/posts`)
+}
+
 export interface Coordinate {
     latitude: number,
     longitude: number
