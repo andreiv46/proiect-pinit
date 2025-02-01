@@ -10,7 +10,7 @@ import Ripple from 'primevue/ripple'
 import {createPinia} from 'pinia'
 import {configureAxios} from "./api/axios.config.ts"
 import {VueQueryPlugin} from "@tanstack/vue-query"
-import {Toast} from "primevue"
+import {ConfirmationService, Toast} from "primevue"
 import Tooltip from 'primevue/tooltip'
 
 const MyPreset = definePreset(Aura, {
@@ -45,6 +45,7 @@ app.directive('ripple', Ripple)
 app.directive('tooltip', Tooltip)
 app.use(router)
 app.use(VueQueryPlugin)
+app.use(ConfirmationService)
 app.mount('#app')
 
 const toastInstance = app.config.globalProperties.$toast as ToastServiceMethods;

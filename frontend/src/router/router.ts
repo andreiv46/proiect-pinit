@@ -8,6 +8,7 @@ import Test from '../components/Test.vue'
 import SignInResult from '../components/SignInResult.vue'
 import Map from "../components/map/Map.vue";
 import AddPost from "../components/AddPost.vue";
+import UserPosts from "../components/UserPosts.vue";
 
 const router = createRouter({
     history: createWebHistory(),
@@ -22,7 +23,12 @@ const router = createRouter({
             path: '/register', component: Register
         },
         {
-            path: '/map', component: Map
+            path: '/map', component: Map,
+            meta: {requiresAuth: true}
+        },
+        {
+            path: '/userPosts', component: UserPosts,
+            meta: {requiresAuth: true}
         },
         {
             path: '/addPost', component: AddPost,

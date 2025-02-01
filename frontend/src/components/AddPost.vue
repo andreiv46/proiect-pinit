@@ -186,7 +186,7 @@ async function onFormSubmit(e: FormSubmitEvent) {
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""/>
-  <div class="flex items-center justify-center flex-col mb-12">
+  <div class="flex items-center justify-center flex-col mb-12 mt-4">
     <div class="flex flex-col justify-center items-center gap-1">
       <i class="pi pi-map-marker text-yellow-500" style="font-size: 6rem"></i>
       <h1 class="text-7xl font-bold mb-12 text-sky-800">Add a New Post</h1>
