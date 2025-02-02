@@ -40,10 +40,37 @@ export async function getUserPosts(
 
         const postsSnapshot = await postsCollection
             .where("userID", "==", userId)
+            .orderBy("createdAt", "desc")
             .get()
         const posts: Post[] = postsSnapshot.docs.map(
             doc => documentWithId<Post>(doc))
         res.status(200).json(posts)
+    } catch (error: unknown) {
+        next(error)
+    }
+}
+
+export async function getUserPostById(
+    req: ExtendedRequest<{ postId: string }, {}, {}, {}>,
+    res: Response,
+    next: NextFunction
+){
+    try {
+        const userToken = req.userToken
+        const {postId} = req.params
+
+        const postSnapshot = await postsCollection.doc(postId).get()
+
+        if (!postSnapshot.exists) {
+            throw new PostNotFoundError()
+        }
+
+        const postData = postSnapshot.data()
+        if (postData?.userID !== userToken?.uid) {
+            throw new UnauthorizedError()
+        }
+
+        res.status(200).json(documentWithId<Post>(postSnapshot))
     } catch (error: unknown) {
         next(error)
     }

@@ -17,6 +17,7 @@ import {
 import * as L from "leaflet"
 import {Marker} from "leaflet"
 import {createPost, uploadPostFiles} from "../api/post.api.ts";
+import router from "../router/router.ts";
 
 const toast = useToast()
 const uploadedFiles = ref<File[]>([])
@@ -170,8 +171,11 @@ async function onFormSubmit(e: FormSubmitEvent) {
       })
 
       const uploadResponse = await uploadPostFiles(data, postId)
-      toast.add({ severity: 'success', summary: 'Files uploaded successfully', life: 3000 })
+      toast.add({severity: 'success', summary: 'Files uploaded successfully', life: 3000})
       console.log(uploadResponse.data)
+      setInterval(async () => {
+        await router.push("/userposts")
+      }, 1000)
     } catch (error) {
       toast.add({severity: 'error', summary: 'Failed to create post or upload files', life: 3000})
       console.error(error)
@@ -193,7 +197,7 @@ async function onFormSubmit(e: FormSubmitEvent) {
     </div>
     <Form v-slot="$form" :initialValues :resolver="resolver" @submit="onFormSubmit"
           validate-on-blur
-          class="flex flex-col gap-4 w-full sm:w-72 lg:w-5/12">
+          class="flex flex-col gap-4 w-full lg:w-5/12 sm:w-72">
       <div class="flex flex-col gap-1">
         <FloatLabel variant="in">
           <InputText name="title" type="text" fluid/>
@@ -254,8 +258,8 @@ async function onFormSubmit(e: FormSubmitEvent) {
         </div>
       </div>
       <div class="flex flex-row gap-2 mt-5">
-        <Button class="w-1/2" type="submit" severity="primary" label="Submit" />
-        <Button class="w-1/2" severity="danger" label="Cancel" />
+        <Button class="w-1/2" type="submit" severity="primary" label="Submit"/>
+        <Button class="w-1/2" severity="danger" label="Cancel"/>
       </div>
     </Form>
   </div>

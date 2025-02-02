@@ -14,11 +14,6 @@ export const ALLOWED_FILE_TYPES = /jpeg|png|jpg|mp4/
 export const MAX_FILE_SIZE = 1024 * 1024 * 2 //2mb maxim
 
 export const uploadPostsFiles = (userId: string, postId: string) => {
-    const directoryPath = `./posts/${userId}/${postId}`
-    if (!fs.existsSync(directoryPath)) {
-        throw new Error(`Directory for user ${userId} and post ${postId} does not exist`)
-    }
-
     return multer({
         storage: memoryStorage(),
         limits: {

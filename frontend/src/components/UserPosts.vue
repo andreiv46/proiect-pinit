@@ -20,6 +20,7 @@ import {FilterMatchMode} from '@primevue/core/api'
 import {Timestamp} from "firebase/firestore";
 import * as L from "leaflet";
 import {LatLngTuple} from "leaflet";
+import router from "../router/router.ts";
 
 const posts = ref<Post[]>([])
 const toast = useToast()
@@ -97,7 +98,7 @@ function onRowExpand(event: any) {
   nextTick(() => {
     setTimeout(() => {
       initializeMap(post)
-    }, 200)
+    }, 500)
   })
 }
 
@@ -126,9 +127,12 @@ function initializeMap(post: Post) {
 
   L.marker([post.location.latitude, post.location.longitude] as LatLngTuple)
       .addTo(toRaw(postMap.value))
-      .bindTooltip(post.title)
 
   postMap.value = {...postMap.value, [post.id]: newMap}
+}
+
+async function onAddNew() {
+  await router.push("/addpost")
 }
 
 function onDeleteConfirmation() {
@@ -161,12 +165,12 @@ function onDeleteConfirmation() {
         console.error(error)
       }
     },
-    // reject: () => {
-    //   toast.add({severity: 'error', summary: 'Rejected', detail: 'You have rejected', life: 3000});
-    // }
-  });
+  })
 }
 
+async function onEditPost(post: Post) {
+  await router.push({name: 'EditPost', params: {id: post.id}})
+}
 </script>
 
 <template>
@@ -185,12 +189,13 @@ function onDeleteConfirmation() {
                  :expandedRows="expandedRows"
                  @rowExpand="onRowExpand"
                  @rowCollapse="onRowCollapse"
-                 :globalFilterFields="['title', 'description']">
+                 :globalFilterFields="['title', 'description']"
+      >
         <template #header>
           <div class="flex justify-between">
             <div>
               <ConfirmDialog></ConfirmDialog>
-              <Button label="New" icon="pi pi-plus" class="mr-2" outlined/>
+              <Button label="New" icon="pi pi-plus" class="mr-2" outlined @click="onAddNew"/>
               <Button label="Delete" icon="pi pi-trash" severity="danger" outlined :disabled="!selectedPost"
                       @click="onDeleteConfirmation"/>
             </div>
@@ -210,12 +215,14 @@ function onDeleteConfirmation() {
             {{ dateFormat(slotProps.data.createdAt) }}
           </template>
         </Column>
-        <Column field="title" header="Title" sortable></Column>
+        <Column field="title" header="Title" sortable>
+        </Column>
         <Column field="description" header="Description"></Column>
         <Column header="Categories">
           <template #body="slotProps">
             <div class="grid grid-cols-2 gap-2">
-              <Chip class="select-none flex justify-center align-center" v-for="category in slotProps.data.categories"
+              <Chip class="select-none flex justify-center align-center overflow-hidden text-ellipsis whitespace-nowrap"
+                    v-for="category in slotProps.data.categories"
                     :label="category"/>
             </div>
           </template>
@@ -231,12 +238,17 @@ function onDeleteConfirmation() {
                  :severity="getSeverity(slotProps.data)"/>
           </template>
         </Column>
+        <Column bodyStyle="text-align:center">
+          <template #body="slotProps">
+            <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="onEditPost(slotProps.data)"/>
+          </template>
+        </Column>
         <template #expansion="slotProps">
           <div class="grid grid-cols-2 gap-2">
             <Carousel v-if="slotProps.data.files?.length" :value="slotProps.data.files" :num-visible="1"
                       :num-scroll="1">
               <template #item="slotProps">
-                <div class="flex justify-center">
+                <div class="flex justify-center items-center h-full">
                   <img alt="dabber" v-if="slotProps.data.type.startsWith('image')"
                        :src="slotProps.data.url"
                        class="max-h-96 object-contain rounded-lg"/>

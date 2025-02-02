@@ -7,7 +7,6 @@ import {Avatar, Button, Carousel, Chip, Drawer, MultiSelect} from "primevue"
 import Select from 'primevue/select'
 import {getPublicPosts, Post} from "../../api/post.api.ts"
 import {useToast} from "primevue/usetoast"
-import {Timestamp} from "firebase/firestore";
 
 const categoryOptions = [
   {name: "Sports"},
@@ -230,7 +229,7 @@ function openFilter() {
       </div>
       <Carousel v-if="selectedPost?.files?.length" :value="selectedPost.files" :num-visible="1" :num-scroll="1">
         <template #item="slotProps">
-          <div class="flex justify-center">
+          <div class="flex justify-center align-center h-full">
             <img alt="dabber" v-if="slotProps.data.type.startsWith('image')"
                  :src="slotProps.data.url"
                  class="max-h-96 object-contain rounded-lg"/>

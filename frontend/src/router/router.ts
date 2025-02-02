@@ -9,41 +9,60 @@ import SignInResult from '../components/SignInResult.vue'
 import Map from "../components/map/Map.vue";
 import AddPost from "../components/AddPost.vue";
 import UserPosts from "../components/UserPosts.vue";
+import EditPost from "../components/EditPost.vue";
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
-            path: '/', component: Home
+            path: '/',
+            component: Home
         },
         {
-            path: '/login', component: Login
+            path: '/login',
+            component: Login
         },
         {
-            path: '/register', component: Register
+            path: '/register',
+            component: Register
         },
         {
-            path: '/map', component: Map,
+            path: '/map',
+
+            component: Map,
             meta: {requiresAuth: true}
         },
         {
-            path: '/userPosts', component: UserPosts,
+            path: '/userPosts',
+            component: UserPosts,
             meta: {requiresAuth: true}
         },
         {
-            path: '/addPost', component: AddPost,
+            path: '/editPost/:id',
+            name: 'EditPost',
+            component: EditPost,
+            meta: {requiresAuth: true},
+            props: true
+        },
+        {
+            path: '/addPost',
+            component: AddPost,
             meta: {requiresAuth: true}
         },
         {
-            path: '/test', component: Test, meta: {
+            path: '/test',
+            component: Test,
+            meta: {
                 requiresAuth: true
             }
         },
         {
-            path: '/signInResult', component: SignInResult
+            path: '/signInResult',
+            component: SignInResult
         },
         {
-            path: '/:pathMatch(.*)*', component: NotFound
+            path: '/:pathMatch(.*)*',
+            component: NotFound
         }
     ],
 })
