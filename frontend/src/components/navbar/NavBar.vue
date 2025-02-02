@@ -8,34 +8,12 @@ import Button from "primevue/button";
 
 const items = ref([
   {
-    label: 'Home',
-    icon: 'pi pi-home'
+    label: 'Posts',
+    icon: 'pi pi-map',
+    command: async () => {
+      await router.push('/map')
+    }
   },
-  {
-    label: 'Projects',
-    icon: 'pi pi-search',
-    badge: 3,
-    items: [
-      {
-        label: 'Core',
-        icon: 'pi pi-bolt',
-        shortcut: '⌘+S'
-      },
-      {
-        label: 'Blocks',
-        icon: 'pi pi-server',
-        shortcut: '⌘+B'
-      },
-      {
-        separator: true
-      },
-      {
-        label: 'UI Kit',
-        icon: 'pi pi-pencil',
-        shortcut: '⌘+U'
-      }
-    ]
-  }
 ])
 const authStore = useAuthStore()
 
@@ -71,12 +49,6 @@ async function goToSignIn(){
       </template>
       <template #end>
         <div class='flex items-center gap-2'>
-          <InputGroup>
-            <InputGroupAddon>
-              <i class='pi pi-search'></i>
-            </InputGroupAddon>
-            <InputText id="search" placeholder='Search' type='text' class='w-32 sm:w-auto'/>
-          </InputGroup>
           <NavBarProfile v-if="authStore.getIsAuthenticated"/>
           <Button v-else class="w-2/5" severity="success" label='Log in' icon='pi pi-sign-in' @click='goToSignIn'/>
         </div>

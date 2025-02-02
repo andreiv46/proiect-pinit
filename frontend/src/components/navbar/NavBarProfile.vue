@@ -18,6 +18,10 @@ function toggle(event: Event) {
   op.value.toggle(event)
 }
 
+async function viewUserPosts() {
+  await router.push('/userposts')
+}
+
 </script>
 
 <template>
@@ -31,12 +35,12 @@ function toggle(event: Event) {
       <Avatar size="xlarge"
               image='https://primefaces.org/cdn/primevue/images/organization/walter.jpg'/>
       <div class="flex flex-col items-center justify-center ">
-        <span class="font-medium">#{{authStore.getCurrentUser?.displayName}}</span>
+        <span class="font-medium">#{{ authStore.getCurrentUser?.displayName }}</span>
         <span class="text-sm text-surface-500 dark:text-surface-400">{{
             authStore.getCurrentUser?.email
           }}</span>
       </div>
-      <Button class="w-full" severity="info" label='Profile' icon='pi pi-user' outlined/>
+      <Button class="w-full" severity="info" label='My posts' icon='pi pi-user' outlined @click="viewUserPosts"/>
       <Button class="w-full" severity="danger" label='Log out' icon='pi pi-sign-out' @click='logout' outlined/>
     </div>
   </Popover>

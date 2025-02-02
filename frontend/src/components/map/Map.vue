@@ -7,6 +7,7 @@ import {Avatar, Button, Carousel, Chip, Drawer, MultiSelect} from "primevue"
 import Select from 'primevue/select'
 import {getPublicPosts, Post} from "../../api/post.api.ts"
 import {useToast} from "primevue/usetoast"
+import {Timestamp} from "firebase/firestore";
 
 const categoryOptions = [
   {name: "Sports"},
@@ -31,6 +32,7 @@ const periodFilterOptions = [
   {name: "This week"},
   {name: "This month"},
   {name: "This year"},
+  {name: "All time"},
 ]
 
 const toast = useToast()
@@ -42,7 +44,7 @@ const visibleLeft = ref(false)
 const markers = ref<Marker[]>([])
 const selectedPost = ref<Post | null>(null)
 const selectedCategoriesFilter = ref<[] | null>(null)
-const selectedPeriodFilter = ref<{ name: string } | null>({name: "Today"})
+const selectedPeriodFilter = ref<{ name: string } | null>({name: "All time"})
 
 onMounted(async () => {
   try {
@@ -149,6 +151,9 @@ function applyFilters() {
       case "This year":
         cutoffDate.setFullYear(now.getFullYear() - 1)
         break;
+      case "All time":
+        cutoffDate = new Date(0)
+        break;
     }
 
     filteredPosts = filteredPosts.filter(post => new Date(post.createdAt._seconds * 1000) >= cutoffDate)
@@ -171,6 +176,11 @@ function onDrawerHide() {
 
 function openFilter() {
   visibleLeft.value = true;
+}
+
+function dateFormat(date: Timestamp) {
+  const options = {day: '2-digit', month: '2-digit', year: 'numeric'}
+  return new Intl.DateTimeFormat('en-GB', options).format(new Date(date._seconds * 1000))
 }
 </script>
 
@@ -217,9 +227,12 @@ function openFilter() {
   <Drawer class="!w-full md:!w-80 lg:!w-[40rem]" v-model:visible="visibleRight"
           position="right" @hide="onDrawerHide">
     <template #header>
-      <div class="flex items-center gap-2">
-        <Avatar image="https://primefaces.org/cdn/primevue/images/organization/walter.jpg"/>
-        <span class="font-bold">{{ selectedPost?.user }}</span>
+      <div class="flex flex-col  ">
+        <div class="flex items-center gap-2">
+          <Avatar image="https://primefaces.org/cdn/primevue/images/organization/walter.jpg"/>
+          <span class="font-bold">{{ selectedPost?.user }}</span>
+        </div>
+        <span>Posted on {{ dateFormat(selectedPost?.createdAt) }}</span>
       </div>
     </template>
     <div class="flex flex-col gap-5">

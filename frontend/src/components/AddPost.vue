@@ -173,9 +173,8 @@ async function onFormSubmit(e: FormSubmitEvent) {
       const uploadResponse = await uploadPostFiles(data, postId)
       toast.add({severity: 'success', summary: 'Files uploaded successfully', life: 3000})
       console.log(uploadResponse.data)
-      setInterval(async () => {
-        await router.push("/userposts")
-      }, 1000)
+
+      await router.push("/userposts")
     } catch (error) {
       toast.add({severity: 'error', summary: 'Failed to create post or upload files', life: 3000})
       console.error(error)

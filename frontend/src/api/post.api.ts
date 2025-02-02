@@ -23,22 +23,40 @@ export async function createPost(data: CreatePostDTO) {
     return await axios.post(`${postRoute}`, data)
 }
 
-export async function getPublicPosts(){
+export async function getPublicPosts() {
     const authStore = useAuthStore()
     setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
     return await axios.get(`${postRoute}`)
 }
 
-export async function getUserPosts(){
+export async function getUserPosts() {
     const authStore = useAuthStore()
     setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
     return await axios.get(`${postRoute}/${authStore.getCurrentUser?.uid}/posts`)
 }
 
-export async function deletePost(postId: string){
+export async function deletePost(postId: string) {
     const authStore = useAuthStore()
     setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
     return await axios.delete(`${postRoute}/${postId}`)
+}
+
+export async function getUserPostById(postId: string) {
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.get(`${postRoute}/${postId}`)
+}
+
+export async function deleteFileFromPost(postId: string, fileUrl: string) {
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.delete(`${postRoute}/${postId}/file`, {data: {fileUrl}})
+}
+
+export async function updatePost(postId: string, data: CreatePostDTO) {
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.put(`${postRoute}/${postId}`, data)
 }
 
 export interface Coordinate {
