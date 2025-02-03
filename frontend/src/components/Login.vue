@@ -2,7 +2,6 @@
 import Button from 'primevue/button'
 import Checkbox from 'primevue/checkbox'
 import InputText from 'primevue/inputtext'
-import Toast from 'primevue/toast'
 
 import {onMounted, ref} from 'vue'
 import router from '../router/router.ts'
@@ -25,7 +24,7 @@ onMounted(async () => {
   const signInChannel = new BroadcastChannel('sigin_channel')
   signInChannel.onmessage = async (message) => {
     if (message.data.type === 'SIGNIN_SUCCESSFUL') {
-      await router.push('/')
+      await router.push('/userposts')
     }
   }
 })
@@ -41,7 +40,7 @@ async function handleLogin() {
         life: 3000,
         closable: true
       })
-      await router.push('/')
+      await router.push('/userposts')
     } else {
       toast.add({
         severity: 'error',
@@ -63,7 +62,7 @@ async function handleLogin() {
         life: 3000,
         closable: true
       })
-      await router.push('/')
+      await router.push('/userposts')
     } else {
       toast.add({
         severity: 'error',
@@ -80,7 +79,7 @@ async function handleLogin() {
 
 <template>
   <!--  bg-gradient-to-r from-teal-500 to-cyan-400-->
-<!--  <Toast/>-->
+  <!--  <Toast/>-->
   <div class='px-6 py-20 md:px-12 lg:px-20'>
     <div class='bg-white dark:bg-slate-800 p-6 shadow-lg rounded-lg w-full lg:w-6/12 mx-auto'>
       <div class='text-center mb-4'>

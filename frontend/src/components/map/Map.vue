@@ -2,7 +2,7 @@
 import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
 import {LatLngTuple, Marker} from 'leaflet';
-import {onMounted, ref, toRaw} from "vue";
+import {nextTick, onMounted, ref, toRaw} from "vue";
 import {Avatar, Button, Carousel, Chip, Drawer, MultiSelect} from "primevue"
 import Select from 'primevue/select'
 import {getPublicPosts, Post} from "../../api/post.api.ts"
@@ -152,8 +152,9 @@ function applyFilters() {
 }
 
 function clearFilters() {
-  if (selectedCategoriesFilter.value === null) return
+  if (selectedCategoriesFilter.value === null && selectedPeriodFilter.value === null) return
   selectedCategoriesFilter.value = null
+  selectedPeriodFilter.value = {name: "All time"}
   clearMarkers()
   drawMarkers(posts.value)
 }

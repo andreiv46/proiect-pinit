@@ -49,7 +49,7 @@ async function goToSignIn(){
       <template #end>
         <div class='flex items-center gap-2'>
           <NavBarProfile v-if="authStore.getIsAuthenticated"/>
-          <Button v-else class="w-2/5" severity="success" label='Log in' icon='pi pi-sign-in' @click='goToSignIn'/>
+          <Button v-else severity="success" outlined label='Log in' icon='pi pi-sign-in' @click='goToSignIn'/>
         </div>
       </template>
     </Menubar>

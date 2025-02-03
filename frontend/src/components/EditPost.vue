@@ -41,23 +41,6 @@ const categories = ref<Array<Category>>([])
 const isPublic = ref<boolean>(false)
 const postFiles = ref<PostFile[]>([])
 
-const categoryOptions = [
-  {name: "Sports"},
-  {name: "Entertainment"},
-  {name: "News"},
-  {name: "Technology"},
-  {name: "Lifestyle"},
-  {name: "Events"},
-  {name: "Nature"},
-  {name: "Education"},
-  {name: "Community"},
-  {name: "Art & Culture"},
-  {name: "Business"},
-  {name: "Science"},
-  {name: "Social Issues"},
-  {name: "Technology & Innovation"},
-  {name: "Local Communities"},
-]
 const categoryStore = useCategoryStore()
 
 onMounted(async () => {

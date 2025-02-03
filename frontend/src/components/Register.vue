@@ -8,6 +8,7 @@ import {ref, watch} from 'vue'
 import {useAuthStore} from '../store/auth.store.ts'
 import router from '../router/router.ts'
 import {Message, FloatLabel} from "primevue";
+import {checkUsername} from "../api/user.api.ts";
 
 const toast = useToast()
 const authStore = useAuthStore()
@@ -23,6 +24,17 @@ async function toLogin() {
 }
 
 async function register() {
+  try {
+    const existingUserNameResponse = await checkUsername(nameInput.value)
+    if (existingUserNameResponse) {
+      usernameMessage.value = 'Username already exists!'
+      usernameSeverity.value = 'error'
+      return
+    }
+  } catch (error) {
+
+  }
+
   await authStore.register({email: emailInput.value, name: nameInput.value, password: passwordInput.value})
   if (authStore.getIsAuthenticated) {
     toast.add({severity: 'success', summary: 'User has been successfully registered!', life: 3000, closable: true})
@@ -32,7 +44,7 @@ async function register() {
       localStorage.setItem('token', token)
       localStorage.setItem('refreshToken', refreshToken)
     }
-    await router.push("/")
+    await router.push("/userposts")
   } else {
     toast.add({
       severity: 'error',
@@ -75,15 +87,16 @@ async function register() {
             <InputText v-model='emailInput' id='email' type='text' class='w-full'/>
             <label for="email">Email</label>
           </FloatLabel>
-          <!--        <Message v-if="" severity="error" size="small" variant="simple">-->
-          <!--          {{ }}-->
-          <!--        </Message>-->
         </div>
         <div class="flex flex-col gap-1">
           <FloatLabel variant="in">
             <InputText v-model='passwordInput' id='password' type='password' class='w-full'/>
             <label for="password">Password</label>
           </FloatLabel>
+          <Message v-if="passwordInput.length < 6 && passwordInput.length > 0" severity="error" size="small"
+                   variant="simple">
+            Password must be at least 6 characters long.
+          </Message>
         </div>
         <Button @click='register' label='Sign In' icon='pi pi-user'
                 class='w-full bg-teal-600 hover:bg-teal-500 text-white mt-6'/>

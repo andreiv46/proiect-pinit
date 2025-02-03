@@ -1,29 +1,18 @@
 <script setup lang='ts'>
 import Button from 'primevue/button'
-import router from '../router/router.ts'
-import {useAuthStore} from '../store/auth.store.ts'
-import {checkUsername} from "../api/user.api.ts";
+import router from "../router/router.ts";
 
-const authStore = useAuthStore()
-
-async function logout() {
-  await authStore.logOut()
-  await router.push('/login')
-}
-
-async function existingUsername() {
-  const response = await checkUsername("ardeugamer42")
-  console.log(response)
-}
-
-async function displayCurrentUser() {
-  console.log(authStore.getCurrentUser)
+async function toUserPosts() {
+  await router.push('/userposts')
 }
 
 </script>
 
 <template>
-  <Button label='Log out' icon='pi pi-user' @click='logout'/>
-  <Button label='Current user' icon='pi pi-user' @click='displayCurrentUser'/>
-  <Button label="existing username" @click="existingUsername"/>
+  <div class="grid grid-cols-1 place-items-center mt-12">
+    <img src='/ecopin.svg'
+         class='fill-teal-600 dark:fill-teal-400 h-56' alt='Logo'/>
+    <span class="font-bold text-9xl">Welcome!</span>
+    <Button class="mt-12" size="large" outlined @click="toUserPosts">Let's get started!</Button>
+  </div>
 </template>
