@@ -2,15 +2,17 @@
 import 'leaflet/dist/leaflet.css';
 import * as L from 'leaflet';
 import {LatLngTuple, Marker} from 'leaflet';
-import {nextTick, onMounted, ref, toRaw} from "vue";
-import {Avatar, Button, Carousel, Chip, Drawer, MultiSelect} from "primevue"
+import {onMounted, ref, toRaw} from "vue";
+import {Avatar, Button, Carousel, Chip, Drawer, Message, MultiSelect, SelectButton} from "primevue"
 import Select from 'primevue/select'
-import {getPublicPosts, Post} from "../../api/post.api.ts"
+import {dislikePost, getPublicPosts, likePost, Post, removeVote} from "../../api/post.api.ts"
 import {useToast} from "primevue/usetoast"
 import {Timestamp} from "firebase/firestore";
 import {useCategoryStore} from "../../store/category.store.ts";
+import {useAuthStore} from "../../store/auth.store.ts";
 
 const categoryStore = useCategoryStore()
+const authStore = useAuthStore()
 
 const periodFilterOptions = [
   {name: "Today"},
@@ -30,6 +32,8 @@ const markers = ref<Marker[]>([])
 const selectedPost = ref<Post | null>(null)
 const selectedCategoriesFilter = ref<[] | null>(null)
 const selectedPeriodFilter = ref<{ name: string } | null>({name: "All time"})
+const selectedLikeFilter = ref(null)
+const likeFilterOptions = ref(["liked", "disliked"])
 
 onMounted(async () => {
   try {
@@ -51,6 +55,11 @@ onMounted(async () => {
     console.log("nu este suportata geolocatia")
     initializeMap(posts.value)
   }
+
+  posts.value.forEach(post => {
+    console.log('HERERER')
+    console.log(post, post.userVotes[authStore.getCurrentUser?.uid])
+  })
 })
 
 function setCurrentPosition(position: GeolocationPosition) {
@@ -97,18 +106,6 @@ function clearMarkers() {
 }
 
 function applyFilters() {
-  // if (!selectedCategoriesFilter.value || selectedCategoriesFilter.value.length === 0) {
-  //   clearMarkers()
-  //   drawMarkers(posts.value)
-  //   return;
-  // }
-  //
-  // const selectedCategories = selectedCategoriesFilter.value.map(c => c.name);
-  //
-  // let filteredPosts = posts.value.filter(post =>
-  //     selectedCategories.every(category => post.categories.includes(category))
-  // )
-
   let filteredPosts = [...posts.value]
 
   if (selectedCategoriesFilter.value && selectedCategoriesFilter.value.length > 0) {
@@ -117,8 +114,6 @@ function applyFilters() {
         selectedCategories.every(category => post.categories.includes(category))
     );
   }
-
-  console.log('here1', selectedPeriodFilter.value)
 
   if (selectedPeriodFilter.value) {
     const now = new Date();
@@ -145,6 +140,12 @@ function applyFilters() {
     }
 
     filteredPosts = filteredPosts.filter(post => new Date(post.createdAt._seconds * 1000) >= cutoffDate)
+
+    if (selectedLikeFilter.value === "liked") {
+      filteredPosts = filteredPosts.filter(post => post.userVotes[authStore.getCurrentUser?.uid] === "like")
+    } else if (selectedLikeFilter.value === "disliked") {
+      filteredPosts = filteredPosts.filter(post => post.userVotes[authStore.getCurrentUser?.uid] === "dislike")
+    }
   }
 
   clearMarkers()
@@ -154,6 +155,7 @@ function applyFilters() {
 function clearFilters() {
   if (selectedCategoriesFilter.value === null && selectedPeriodFilter.value === null) return
   selectedCategoriesFilter.value = null
+  selectedLikeFilter.value = null
   selectedPeriodFilter.value = {name: "All time"}
   clearMarkers()
   drawMarkers(posts.value)
@@ -170,6 +172,36 @@ function openFilter() {
 function dateFormat(date: Timestamp) {
   const options = {day: '2-digit', month: '2-digit', year: 'numeric'}
   return new Intl.DateTimeFormat('en-GB', options).format(new Date(date._seconds * 1000))
+}
+
+async function handleLike(post: Post) {
+  if (post.userVotes[authStore.getCurrentUser?.uid!] === "like") {
+    await removeVote(post.id);
+    post.userVotes[authStore.getCurrentUser?.uid!] = undefined;
+    post.likes--;
+  } else {
+    await likePost(post.id);
+    if (post.userVotes[authStore.getCurrentUser?.uid!] === "dislike") {
+      post.dislikes--;
+    }
+    post.userVotes[authStore.getCurrentUser?.uid!] = "like";
+    post.likes++;
+  }
+}
+
+async function handleDislike(post: Post) {
+  if (post.userVotes[authStore.getCurrentUser?.uid!] === "dislike") {
+    await removeVote(post.id);
+    post.userVotes[authStore.getCurrentUser?.uid!] = undefined;
+    post.dislikes--;
+  } else {
+    await dislikePost(post.id);
+    if (post.userVotes[authStore.getCurrentUser?.uid!] === "like") {
+      post.likes--;
+    }
+    post.userVotes[authStore.getCurrentUser?.uid!] = "dislike";
+    post.dislikes++;
+  }
 }
 </script>
 
@@ -195,6 +227,9 @@ function dateFormat(date: Timestamp) {
           <Select v-model="selectedPeriodFilter" :options="periodFilterOptions" optionLabel="name"
                   placeholder="Select a period"
                   class="w-full"/>
+        </div>
+        <div class="card flex justify-center">
+          <SelectButton v-model="selectedLikeFilter" :options="likeFilterOptions"/>
         </div>
       </div>
       <template #footer>
@@ -229,21 +264,47 @@ function dateFormat(date: Timestamp) {
       <div class="flex flex-row gap-2">
         <Chip class="select-none" v-for="category in selectedPost?.categories" :label="category"/>
       </div>
-      <Carousel v-if="selectedPost?.files?.length" :value="selectedPost.files" :num-visible="1" :num-scroll="1">
-        <template #item="slotProps">
-          <div class="flex justify-center align-center h-full">
-            <img alt="dabber" v-if="slotProps.data.type.startsWith('image')"
-                 :src="slotProps.data.url"
-                 class="max-h-96 object-contain rounded-lg"/>
-            <video v-else-if="slotProps.data.type.startsWith('video')" controls
-                   class="max-h-96 object-contain rounded-lg">
-              <source :src="slotProps.data.url" :type="slotProps.data.type"/>
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        </template>
-      </Carousel>
-      <p>{{ selectedPost?.description }}</p>
+      <div v-if="selectedPost?.userID !== authStore.getCurrentUser?.uid" class="grid grid-cols-1 gap-2 mb-6 w-full">
+        <div class="flex flex-row gap-2">
+          <Button
+              class="w-full"
+              icon="pi pi-thumbs-up"
+              :label="selectedPost?.likes.toString()"
+              outlined
+              @click="handleLike(selectedPost!)"
+          />
+          <Button
+              class="w-full"
+              :label="selectedPost?.dislikes.toString()"
+              icon="pi pi-thumbs-down"
+              outlined
+              @click="handleDislike(selectedPost!)"
+          />
+        </div>
+        <Message v-if="selectedPost?.userVotes[authStore.getCurrentUser?.uid] === 'like'"
+                 severity="info">
+          You liked this post
+        </Message>
+        <Message v-if="selectedPost?.userVotes[authStore.getCurrentUser?.uid] === 'dislike'"
+                 severity="error">
+          You disliked this post
+        </Message>
+      </div>
     </div>
+    <Carousel v-if="selectedPost?.files?.length" :value="selectedPost.files" :num-visible="1" :num-scroll="1">
+      <template #item="slotProps">
+        <div class="flex justify-center align-center h-full">
+          <img alt="dabber" v-if="slotProps.data.type.startsWith('image')"
+               :src="slotProps.data.url"
+               class="max-h-96 object-contain rounded-lg"/>
+          <video v-else-if="slotProps.data.type.startsWith('video')" controls
+                 class="max-h-96 object-contain rounded-lg">
+            <source :src="slotProps.data.url" :type="slotProps.data.type"/>
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </template>
+    </Carousel>
+    <p>{{ selectedPost?.description }}</p>
   </Drawer>
 </template>

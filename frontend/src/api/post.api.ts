@@ -59,6 +59,24 @@ export async function updatePost(postId: string, data: CreatePostDTO) {
     return await axios.put(`${postRoute}/${postId}`, data)
 }
 
+export async function likePost(postId: string){
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.post(`${postRoute}/${postId}/like`)
+}
+
+export async function dislikePost(postId: string){
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.post(`${postRoute}/${postId}/dislike`)
+}
+
+export async function removeVote(postId: string){
+    const authStore = useAuthStore()
+    setAxiosAuthHeader(await authStore.getCurrentUser?.getIdToken() ?? "")
+    return await axios.post(`${postRoute}/${postId}/remove-vote`)
+}
+
 export interface Coordinate {
     latitude: number,
     longitude: number
