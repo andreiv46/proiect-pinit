@@ -7,7 +7,9 @@ import {
     deletePost,
     getUserPostById,
     deleteFileFromPost,
-    updatePost
+    updatePost,
+    likePost,
+    dislikePost, removeVoteFromPost,
 } from "../controller/post.controller"
 import {verifyJWTToken} from "../middleware/auth.middleware"
 import {validateSchema} from "../middleware/schema.middleware";
@@ -24,5 +26,8 @@ router
     .patch("/:userId/:postId/upload", verifyJWTToken, uploadFilesToPostController)
     .delete("/:postId", verifyJWTToken, deletePost)
     .delete("/:postId/file", verifyJWTToken, deleteFileFromPost)
+    .post("/:postId/like", verifyJWTToken, likePost)
+    .post("/:postId/dislike", verifyJWTToken, dislikePost)
+    .post("/:postId/remove-vote", verifyJWTToken, removeVoteFromPost)
 
 export default router

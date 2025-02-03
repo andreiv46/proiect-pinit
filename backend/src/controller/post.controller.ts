@@ -12,6 +12,7 @@ import {ContainerClient} from "@azure/storage-blob";
 import {UnauthorizedError} from "../error/auth.error";
 
 const postsCollection = db.collection('posts')
+const userVotesCollection = db.collection('uservotes')
 const postFilesContainer = blobServiceClient.getContainerClient("postfiles")
 
 export async function getPublicPosts(_req: ExtendedRequest, res: Response, next: NextFunction) {
@@ -178,6 +179,155 @@ export async function updatePost(
         await postsCollection.doc(postId).update(updatedPost)
 
         res.status(200).json({message: "Post updated successfully"})
+    } catch (error: unknown) {
+        next(error)
+    }
+}
+
+export async function likePost(
+    req: ExtendedRequest<{ postId: string }, {}, {}, {}>,
+    res: Response,
+    next: NextFunction
+) {
+    try {
+        const userToken = req.userToken
+        const {postId} = req.params
+
+        const postSnapshot = await postsCollection.doc(postId).get()
+
+        if (!postSnapshot.exists) {
+            throw new PostNotFoundError()
+        }
+
+        const postData = postSnapshot.data()
+        if (postData?.userID === userToken?.uid) {
+            res.status(400).json({message: "You cannot like your own post"})
+            return
+        }
+
+        const userVotes = postData?.userVotes || {}
+        if (userVotes[userToken?.uid!] && userVotes[userToken?.uid!] === "like") {
+            res.status(400).json({message: "You have already liked this post"})
+            return
+        }
+
+        if (userVotes[userToken?.uid!] === "dislike") {
+            userVotes[userToken?.uid!] = "like"
+            await postsCollection.doc(postId).update({
+                likes: postData?.likes + 1,
+                dislikes: postData?.dislikes - 1,
+                userVotes,
+            })
+            res.status(200).json({message: "Post liked successfully"})
+            return
+        }
+
+        userVotes[userToken?.uid!] = "like"
+        await postsCollection.doc(postId).update({
+            likes: postData?.likes + 1,
+            userVotes,
+        })
+
+        res.status(200).json({message: "Post liked successfully"})
+    } catch (error: unknown) {
+        next(error)
+    }
+}
+
+export async function dislikePost(
+    req: ExtendedRequest<{ postId: string }, {}, {}, {}>,
+    res: Response,
+    next: NextFunction
+) {
+    try {
+        const userToken = req.userToken
+        const {postId} = req.params
+
+        const postSnapshot = await postsCollection.doc(postId).get()
+
+        if (!postSnapshot.exists) {
+            throw new PostNotFoundError()
+        }
+
+        const postData = postSnapshot.data()
+        if (postData?.userID === userToken?.uid) {
+            res.status(400).json({message: "You cannot dislike your own post"})
+            return
+        }
+
+        const userVotes = postData?.userVotes || {}
+        if (userVotes[userToken?.uid!] && userVotes[userToken?.uid!] === "dislike") {
+            res.status(400).json({message: "You have already disliked this post"})
+            return
+        }
+
+        if (userVotes[userToken?.uid!] === "like") {
+            userVotes[userToken?.uid!] = "dislike"
+            await postsCollection.doc(postId).update({
+                likes: postData?.likes - 1,
+                dislikes: postData?.dislikes + 1,
+                userVotes,
+            })
+            res.status(200).json({message: "Post disliked successfully"})
+            return
+        }
+
+        userVotes[userToken?.uid!] = "dislike"
+        await postsCollection.doc(postId).update({
+            dislikes: postData?.dislikes + 1,
+            userVotes,
+        })
+
+        res.status(200).json({message: "Post disliked successfully"})
+    } catch (error: unknown) {
+        next(error)
+    }
+}
+
+export async function removeVoteFromPost(
+    req: ExtendedRequest<{ postId: string }, {}, {}, {}>,
+    res: Response,
+    next: NextFunction
+) {
+    try {
+        const userToken = req.userToken
+        const {postId} = req.params
+
+        const postSnapshot = await postsCollection.doc(postId).get()
+
+        if (!postSnapshot.exists) {
+            throw new PostNotFoundError()
+        }
+
+        const postData = postSnapshot.data()
+        if (postData?.userID === userToken?.uid) {
+            res.status(400).json({message: "You cannot remove vote from your own post"})
+            return
+        }
+
+        const userVotes = postData?.userVotes || {}
+        if (!userVotes[userToken?.uid!]) {
+            res.status(400).json({message: "You have not voted for this post"})
+            return
+        }
+
+        if (userVotes[userToken?.uid!] === "like") {
+            await postsCollection.doc(postId).update({
+                likes: postData?.likes - 1,
+            })
+        } else {
+            await postsCollection.doc(postId).update({
+                dislikes: postData?.dislikes - 1,
+            })
+        }
+
+        delete userVotes[userToken?.uid!]
+
+        await postsCollection.doc(postId).update({
+            userVotes,
+        })
+
+        res.status(200).json({message: "Vote removed successfully"})
     } catch (error: unknown) {
         next(error)
     }

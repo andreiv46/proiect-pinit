@@ -1,7 +1,7 @@
 import {Timestamp} from "firebase/firestore";
 
-export interface PostLike {
-    userId: string;
-    postId: string;
-    createdAt: Timestamp;
+export interface UserVote {
+    userId: string
+    postId: string
+    vote: "like" | "dislike"
 }

@@ -8,24 +8,9 @@ import Select from 'primevue/select'
 import {getPublicPosts, Post} from "../../api/post.api.ts"
 import {useToast} from "primevue/usetoast"
 import {Timestamp} from "firebase/firestore";
+import {useCategoryStore} from "../../store/category.store.ts";
 
-const categoryOptions = [
-  {name: "Sports"},
-  {name: "Entertainment"},
-  {name: "News"},
-  {name: "Technology"},
-  {name: "Lifestyle"},
-  {name: "Events"},
-  {name: "Nature"},
-  {name: "Education"},
-  {name: "Community"},
-  {name: "Art & Culture"},
-  {name: "Business"},
-  {name: "Science"},
-  {name: "Social Issues"},
-  {name: "Technology & Innovation"},
-  {name: "Local Communities"},
-]
+const categoryStore = useCategoryStore()
 
 const periodFilterOptions = [
   {name: "Today"},
@@ -48,6 +33,9 @@ const selectedPeriodFilter = ref<{ name: string } | null>({name: "All time"})
 
 onMounted(async () => {
   try {
+    if (!categoryStore.categories.length) {
+      await categoryStore.fetchCategories()
+    }
     const postsResponse = await getPublicPosts()
     posts.value = postsResponse.data
     toast.add({severity: 'success', summary: 'Post fetched successfully', life: 3000})
@@ -197,7 +185,7 @@ function dateFormat(date: Timestamp) {
         </div>
       </template>
       <div class="flex flex-col gap-5">
-        <MultiSelect name="categories" :options="categoryOptions" optionLabel="name" filter display="chip"
+        <MultiSelect name="categories" :options="categoryStore.categories" optionLabel="name" filter display="chip"
                      v-model="selectedCategoriesFilter"
                      placeholder="Categories"
                      size="large"

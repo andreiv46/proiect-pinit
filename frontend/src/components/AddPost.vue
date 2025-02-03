@@ -18,6 +18,7 @@ import * as L from "leaflet"
 import {Marker} from "leaflet"
 import {createPost, uploadPostFiles} from "../api/post.api.ts";
 import router from "../router/router.ts";
+import {useCategoryStore} from "../store/category.store.ts";
 
 const toast = useToast()
 const uploadedFiles = ref<File[]>([])
@@ -48,23 +49,7 @@ const initialValues = ref<AddPostFormDTO>({
   isPublic: false,
 })
 
-const categoryOptions = [
-  {name: "Sports"},
-  {name: "Entertainment"},
-  {name: "News"},
-  {name: "Technology"},
-  {name: "Lifestyle"},
-  {name: "Events"},
-  {name: "Nature"},
-  {name: "Education"},
-  {name: "Community"},
-  {name: "Art & Culture"},
-  {name: "Business"},
-  {name: "Science"},
-  {name: "Social Issues"},
-  {name: "Technology & Innovation"},
-  {name: "Local Communities"},
-]
+const categoryStore = useCategoryStore()
 
 const resolver = ref(zodResolver(
     z.object({
@@ -84,13 +69,17 @@ const resolver = ref(zodResolver(
     })
 ))
 
-onMounted(() => {
+onMounted(async () => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(setCurrentPosition, () => initializeMap())
     console.log(currentLocation.value)
   } else {
     console.log("nu este suportata geolocatia")
     initializeMap()
+  }
+
+  if (!categoryStore.categories.length) {
+    await categoryStore.fetchCategories()
   }
 })
 
@@ -216,7 +205,7 @@ async function onFormSubmit(e: FormSubmitEvent) {
         </Message>
       </div>
       <div class="flex flex-col gap-1">
-        <MultiSelect name="categories" :options="categoryOptions" optionLabel="name" filter display="chip"
+        <MultiSelect name="categories" :options="categoryStore.categories" optionLabel="name" filter display="chip"
                      placeholder="Categories"
                      size="large"
                      :maxSelectedLabels="3" class="w-full"/>

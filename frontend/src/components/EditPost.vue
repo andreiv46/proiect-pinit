@@ -20,6 +20,7 @@ import * as L from "leaflet"
 import {Marker} from "leaflet"
 import {Timestamp} from "firebase/firestore";
 import router from "../router/router.ts";
+import {Category, useCategoryStore} from "../store/category.store.ts";
 
 interface PostFile {
   url: string;
@@ -36,7 +37,7 @@ const selectedMarker = ref<Marker | null>(null)
 const editPostMap = ref()
 const title = ref<string>('')
 const description = ref<string>('')
-const categories = ref<Array<{ name: string }>>([])
+const categories = ref<Array<Category>>([])
 const isPublic = ref<boolean>(false)
 const postFiles = ref<PostFile[]>([])
 
@@ -57,12 +58,18 @@ const categoryOptions = [
   {name: "Technology & Innovation"},
   {name: "Local Communities"},
 ]
+const categoryStore = useCategoryStore()
 
 onMounted(async () => {
   console.log('da ma daa')
   try {
     const postId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
     console.log(postId)
+
+    if (!categoryStore.categories.length) {
+      await categoryStore.fetchCategories()
+    }
+
     const postResponse = await getUserPostById(postId as string)
     post.value = postResponse.data
     console.log(post.value)
@@ -74,9 +81,9 @@ onMounted(async () => {
         description.value = post.value.description
         categories.value = post.value.categories
             .map((category: string) => {
-              return categoryOptions.find(option => option.name === category) || null
+              return categoryStore.categories.find(option  => option.name === category) || null
             })
-            .filter((category): category is { name: string } => category !== null)
+            .filter((category): category is Category => category !== null)
         isPublic.value = post.value.visibility === "public"
         postFiles.value = post.value.files
       }
@@ -309,7 +316,7 @@ async function onSaveChanges() {
         </Message>
       </div>
       <div class="flex flex-col gap-1">
-        <MultiSelect v-model="categories" name="categories" :options="categoryOptions" optionLabel="name" filter
+        <MultiSelect v-model="categories" name="categories" :options="categoryStore.categories" optionLabel="name" filter
                      display="chip"
                      placeholder="Categories"
                      size="large"

@@ -24,7 +24,6 @@ async function toHome() {
 async function goToSignIn(){
   await router.push('/login')
 }
-
 </script>
 
 <template>

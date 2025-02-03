@@ -5,6 +5,7 @@ import {errorHandler} from './config/error/error-handler'
 import postRoute from "./route/post.route";
 import log from "./config/logger/logger";
 import userRoute from "./route/user.route";
+import categoryRoute from "./route/category.route";
 
 const app = express()
 
@@ -13,6 +14,7 @@ app.use(cors())
 
 app.use('/post', postRoute)
 app.use('/user', userRoute)
+app.use('/category', categoryRoute)
 
 app.use(errorHandler)
 app.listen(process.env.PORT, () => {
